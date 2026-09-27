@@ -1,0 +1,30 @@
+name: byteflow
+description: "Offline Android Network Monitor & Data Saver"
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.5.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  dynamic_color: ^1.7.0
+  flutter_localizations:
+    sdk: flutter
+  provider: ^6.1.5
+  shared_preferences: ^2.5.4
+  intl: ^0.20.2
+  fl_chart: ^1.2.0
+  sqflite: ^2.4.2
+  path: ^1.9.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true

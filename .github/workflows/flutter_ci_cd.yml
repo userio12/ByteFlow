@@ -1,0 +1,85 @@
+name: ByteFlow CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-and-build:
+    name: Test, Analyze & Build APKs/AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+          cache: 'gradle'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Verify Flutter & Dart environment
+        run: |
+          flutter --version
+          dart --version
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Static Code Analysis
+        run: flutter analyze
+
+      - name: Run Unit & Widget Tests
+        run: flutter test
+
+      - name: Make Gradle Wrapper executable
+        run: chmod +x android/gradlew
+
+      - name: Build Split-ABI Debug APKs
+        run: flutter build apk --debug --split-per-abi
+
+      - name: Build Split-ABI Release APKs
+        run: flutter build apk --release --split-per-abi
+
+      - name: Build Release App Bundle (AAB)
+        run: flutter build appbundle --release
+
+      - name: Upload Debug Split APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ByteFlow-Debug-APKs
+          path: build/app/outputs/flutter-apk/*-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload Release Split APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: ByteFlow-Release-APKs
+          path: build/app/outputs/flutter-apk/*-release.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Upload Release App Bundle (.aab)
+        uses: actions/upload-artifact@v4
+        with:
+          name: ByteFlow-Release-AAB
+          path: build/app/outputs/bundle/release/*.aab
+          if-no-files-found: error
+          retention-days: 30

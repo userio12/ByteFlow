@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ByteFlow</string>
+    <string name="widget_name">ByteFlow Data Glance</string>
+    <string name="widget_description">Displays today\'s data consumption and active plan progress.</string>
+    <string name="widget_default_carrier">No SIM / Offline</string>
+    <string name="widget_today_label">TODAY</string>
+    <string name="widget_mobile_default">0 MB</string>
+    <string name="widget_wifi_default">0 MB</string>
+    <string name="widget_quota_default">No Plan Active</string>
+    <string name="speed_channel_name">Live Network Speed</string>
+    <string name="speed_channel_desc">Shows ongoing real-time download and upload throughput in the status bar.</string>
+</resources>

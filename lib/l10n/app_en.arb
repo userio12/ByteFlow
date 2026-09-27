@@ -1,0 +1,141 @@
+{
+  "@@locale": "en",
+  "appTitle": "ByteFlow",
+  "@appTitle": {
+    "description": "The title of the ByteFlow application"
+  },
+  "helloMessage": "ByteFlow Network Monitor",
+  "@helloMessage": {
+    "description": "Greeting message on splash/header"
+  },
+  "appDescription": "Offline Android Network Monitor & Data Saver",
+  "@appDescription": {
+    "description": "Short application description"
+  },
+  "tabDashboard": "Dashboard",
+  "@tabDashboard": {
+    "description": "Dashboard tab label"
+  },
+  "tabApps": "Apps",
+  "@tabApps": {
+    "description": "Apps detective tab label"
+  },
+  "tabHistory": "History",
+  "@tabHistory": {
+    "description": "History analytics tab label"
+  },
+  "tabPlan": "Plans",
+  "@tabPlan": {
+    "description": "Data plan tab label"
+  },
+  "tabSettings": "Settings",
+  "@tabSettings": {
+    "description": "Settings navigation label"
+  },
+  "download": "Download",
+  "@download": {
+    "description": "Download throughput label"
+  },
+  "upload": "Upload",
+  "@upload": {
+    "description": "Upload throughput label"
+  },
+  "todayMobile": "Today Mobile",
+  "@todayMobile": {
+    "description": "Today's cellular data consumption label"
+  },
+  "todayWifi": "Today Wi-Fi",
+  "@todayWifi": {
+    "description": "Today's Wi-Fi data consumption label"
+  },
+  "searchAppsHint": "Search applications...",
+  "@searchAppsHint": {
+    "description": "Search input placeholder in App Usage screen"
+  },
+  "filterAll": "All Networks",
+  "@filterAll": {
+    "description": "Filter button for all network traffic"
+  },
+  "filterMobile": "Mobile",
+  "@filterMobile": {
+    "description": "Filter button for cellular traffic"
+  },
+  "filterWifi": "Wi-Fi",
+  "@filterWifi": {
+    "description": "Filter button for Wi-Fi traffic"
+  },
+  "foreground": "Foreground",
+  "@foreground": {
+    "description": "Foreground data consumption badge"
+  },
+  "background": "Background",
+  "@background": {
+    "description": "Background data consumption badge"
+  },
+  "timeRangeToday": "Today",
+  "@timeRangeToday": {
+    "description": "Today 24h time range selector"
+  },
+  "timeRangeWeek": "Weekly",
+  "@timeRangeWeek": {
+    "description": "7-day time range selector"
+  },
+  "timeRangeMonth": "Monthly",
+  "@timeRangeMonth": {
+    "description": "Billing cycle time range selector"
+  },
+  "timeRangeYear": "Yearly",
+  "@timeRangeYear": {
+    "description": "12-month time range selector"
+  },
+  "dailyAverage": "Daily Average",
+  "@dailyAverage": {
+    "description": "Daily average consumption metric label"
+  },
+  "projectedTotal": "Projected Total",
+  "@projectedTotal": {
+    "description": "Projected end-of-cycle total metric label"
+  },
+  "wifiOffload": "Wi-Fi Offload",
+  "@wifiOffload": {
+    "description": "Wi-Fi offload percentage metric label"
+  },
+  "cellularPlan": "Cellular Plan",
+  "@cellularPlan": {
+    "description": "Cellular plan tab label"
+  },
+  "wifiPlan": "Wi-Fi Plan",
+  "@wifiPlan": {
+    "description": "Wi-Fi / Hotspot plan tab label"
+  },
+  "quotaUsed": "Quota Used",
+  "@quotaUsed": {
+    "description": "Plan quota consumed amount label"
+  },
+  "quotaRemaining": "Quota Remaining",
+  "@quotaRemaining": {
+    "description": "Plan quota remaining amount label"
+  },
+  "daysRemaining": "{count, plural, =1{1 day left} other{{count} days left}}",
+  "@daysRemaining": {
+    "description": "Days remaining in billing cycle",
+    "placeholders": {
+      "count": {
+        "type": "num",
+        "format": "compact"
+      }
+    }
+  },
+  "exportReport": "Export Usage Report",
+  "@exportReport": {
+    "description": "Export data button in Settings"
+  },
+  "clearCache": "Clear Cached History",
+  "@clearCache": {
+    "description": "Clear database cache button in Settings"
+  },
+  "openSourceLicenses": "Open Source Licenses",
+  "@openSourceLicenses": {
+    "description": "Open source licenses settings tile"
+  }
+}

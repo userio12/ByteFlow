@@ -1,0 +1,45 @@
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+# IntelliJ / Android Studio
+*.iml
+.idea/
+.shelf/
+
+# Visual Studio Code
+.vscode/
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+/build/
+
+# Android specific
+**/android/**/gradle-app.setting
+**/android/**/local.properties
+**/android/**/GeneratedPluginRegistrant.java
+**/android/.gradle
+**/android/captures/
+**/android/gradle/wrapper/gradle-wrapper.jar
+!**/android/gradle/wrapper/gradle-wrapper.properties
+
+# AndroidPE & Agent Analysis Artifacts
+.androidpe/
+graphify-out/
+
+# Keystores & Signing Secrets
+*.keystore
+*.jks
