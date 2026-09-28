@@ -27,14 +27,14 @@ class AppDatabase {
       dbPath,
       version: AppConstants.databaseVersion,
       onConfigure: (db) async {
-        // High-performance WAL mode & normal synchronous writes
+        // High-performance WAL mode & synchronous writes.
+        // PRAGMA journal_mode returns a result set so it MUST be executed via rawQuery.
+        // Calling db.execute() invokes SQLiteDatabase.execSQL() on Android which throws
+        // "Queries can be performed using SQLiteDatabase query or rawQuery methods only"
+        // and causes sqflite native code to abort and close the database connection.
         try {
-          await db.execute('PRAGMA journal_mode = WAL;');
-        } catch (_) {
-          try {
-            await db.rawQuery('PRAGMA journal_mode = WAL;');
-          } catch (_) {}
-        }
+          await db.rawQuery('PRAGMA journal_mode = WAL;');
+        } catch (_) {}
         try {
           await db.execute('PRAGMA synchronous = NORMAL;');
           await db.execute('PRAGMA temp_store = MEMORY;');
