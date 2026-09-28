@@ -23,14 +23,56 @@ import 'ui/features/settings/views/settings_view.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final providers = await DependencyInjection.createProviders();
 
-  runApp(
-    MultiProvider(
-      providers: providers,
-      child: const ByteFlowApp(),
-    ),
-  );
+  try {
+    final providers = await DependencyInjection.createProviders();
+
+    runApp(
+      MultiProvider(
+        providers: providers,
+        child: const ByteFlowApp(),
+      ),
+    );
+  } catch (error, stackTrace) {
+    debugPrint('ByteFlow fatal initialization error: $error\n$stackTrace');
+    runApp(
+      MaterialApp(
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          useMaterial3: true,
+          colorSchemeSeed: const Color(0xFF3B82F6),
+        ),
+        home: Scaffold(
+          body: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(24.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(
+                    Icons.error_outline_rounded,
+                    size: 56,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Failed to initialize ByteFlow',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    error.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// The root ByteFlow application widget configuring Material 3 dynamic Monet palettes and localization.
@@ -138,6 +180,7 @@ class _MainNavigationHostState extends State<MainNavigationHost> {
 
     final children = [
       DashboardView(
+        key: const ValueKey('tab_dashboard'),
         viewModel: dashboardVm,
         useBits: settingsVm.isSpeedUnitBits,
         onNavigateToApps: () => _setDestination(1),
@@ -145,12 +188,15 @@ class _MainNavigationHostState extends State<MainNavigationHost> {
         onOpenSettings: _openSettings,
       ),
       AppUsageView(
+        key: const ValueKey('tab_apps'),
         viewModel: context.watch<AppUsageViewModel>(),
       ),
       HistoryView(
+        key: const ValueKey('tab_history'),
         viewModel: context.watch<HistoryViewModel>(),
       ),
       PlanView(
+        key: const ValueKey('tab_plan'),
         viewModel: planVm,
       ),
     ];

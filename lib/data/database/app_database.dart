@@ -28,10 +28,19 @@ class AppDatabase {
       version: AppConstants.databaseVersion,
       onConfigure: (db) async {
         // High-performance WAL mode & normal synchronous writes
-        await db.execute('PRAGMA journal_mode = WAL;');
-        await db.execute('PRAGMA synchronous = NORMAL;');
-        await db.execute('PRAGMA temp_store = MEMORY;');
-        await db.execute('PRAGMA cache_size = -4000;'); // 4MB cache
+        try {
+          await db.execute('PRAGMA journal_mode = WAL;');
+        } catch (_) {
+          try {
+            await db.rawQuery('PRAGMA journal_mode = WAL;');
+          } catch (_) {}
+        }
+        try {
+          await db.execute('PRAGMA synchronous = NORMAL;');
+          await db.execute('PRAGMA temp_store = MEMORY;');
+          await db.execute('PRAGMA cache_size = -4000;'); // 4MB cache
+          await db.execute('PRAGMA busy_timeout = 5000;');
+        } catch (_) {}
       },
       onCreate: (db, version) async {
         // 1. Hourly snapshots

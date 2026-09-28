@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -38,7 +39,11 @@ abstract final class DependencyInjection {
     final prefs = sharedPreferences ?? await SharedPreferences.getInstance();
     final db = appDatabase ?? AppDatabase();
     final localDbService = LocalDatabaseService(db);
-    await localDbService.init();
+    try {
+      await localDbService.init();
+    } catch (e, stack) {
+      debugPrint('LocalDatabaseService pre-warm warning (will initialize lazily): $e\n$stack');
+    }
 
     final nativeNetworkService = NativeNetworkService();
     final localPrefsService = LocalPreferencesService(prefs);

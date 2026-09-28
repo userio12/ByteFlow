@@ -82,6 +82,11 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <!-- Enable SQLite WAL mode globally on Android for sqflite -->
+        <meta-data
+            android:name="com.tekartik.sqflite.wal_enabled"
+            android:value="true" />
     </application>
 
     <queries>
