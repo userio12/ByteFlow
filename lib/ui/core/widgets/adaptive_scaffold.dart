@@ -13,6 +13,7 @@ class AdaptiveScaffold extends StatelessWidget {
   final List<Widget> children;
   final bool hasActiveTraffic;
   final bool hasPlanWarning;
+  final double bottomBarCornerRadius;
 
   const AdaptiveScaffold({
     super.key,
@@ -21,6 +22,7 @@ class AdaptiveScaffold extends StatelessWidget {
     required this.children,
     this.hasActiveTraffic = false,
     this.hasPlanWarning = false,
+    this.bottomBarCornerRadius = 24.0,
   });
 
   static const double largeScreenMinWidth = 600.0;
@@ -70,17 +72,42 @@ class AdaptiveScaffold extends StatelessWidget {
           );
         }
 
+        final topRadius = Radius.circular(bottomBarCornerRadius);
+        final topRoundedBorderRadius = BorderRadius.only(
+          topLeft: topRadius,
+          topRight: topRadius,
+        );
+
         return Scaffold(
           body: IndexedStack(
             index: currentIndex,
             children: children,
           ),
-          bottomNavigationBar: NavigationBar(
-            selectedIndex: currentIndex,
-            onDestinationSelected: _handleDestinationSelected,
-            backgroundColor: colorScheme.surfaceContainer,
-            indicatorColor: colorScheme.secondaryContainer,
-            destinations: _buildBarDestinations(context),
+          bottomNavigationBar: Container(
+            decoration: BoxDecoration(
+              color: colorScheme.surfaceContainer,
+              borderRadius: topRoundedBorderRadius,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(
+                    alpha: theme.brightness == Brightness.dark ? 0.25 : 0.08,
+                  ),
+                  blurRadius: 10.0,
+                  offset: const Offset(0, -2),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: topRoundedBorderRadius,
+              clipBehavior: Clip.antiAlias,
+              child: NavigationBar(
+                selectedIndex: currentIndex,
+                onDestinationSelected: _handleDestinationSelected,
+                backgroundColor: colorScheme.surfaceContainer,
+                indicatorColor: colorScheme.secondaryContainer,
+                destinations: _buildBarDestinations(context),
+              ),
+            ),
           ),
         );
       },

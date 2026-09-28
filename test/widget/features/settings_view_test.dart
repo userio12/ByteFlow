@@ -1,6 +1,11 @@
 import 'package:byteflow/domain/use_cases/toggle_live_speed_use_case.dart';
 import 'package:byteflow/ui/features/settings/view_models/settings_view_model.dart';
+import 'package:byteflow/ui/features/settings/views/about_settings_view.dart';
+import 'package:byteflow/ui/features/settings/views/appearance_settings_view.dart';
+import 'package:byteflow/ui/features/settings/views/data_privacy_settings_view.dart';
+import 'package:byteflow/ui/features/settings/views/live_speed_settings_view.dart';
 import 'package:byteflow/ui/features/settings/views/settings_view.dart';
+import 'package:byteflow/ui/features/settings/views/system_health_settings_view.dart';
 import 'package:byteflow/ui/features/settings/widgets/battery_saver_card.dart';
 import 'package:byteflow/ui/features/settings/widgets/data_management_card.dart';
 import 'package:byteflow/ui/features/settings/widgets/permission_health_card.dart';
@@ -12,7 +17,7 @@ import '../../mocks/mock_native_network_service.dart';
 import '../../mocks/mock_repositories.dart';
 
 void main() {
-  group('SettingsView Widget Test', () {
+  group('SettingsView Hub & Sub-Screens Widget Test', () {
     late FakeSettingsRepository fakeSettingsRepo;
     late MockNativeNetworkService mockNativeService;
     late SettingsViewModel viewModel;
@@ -31,7 +36,7 @@ void main() {
       );
     });
 
-    testWidgets('renders all settings cards and handles export and clear cache flows',
+    testWidgets('renders all 5 settings sub-screen hub tiles and navigates seamlessly',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -46,23 +51,76 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      // 1. App bar
+      // 1. App bar & Hub Headers
       expect(find.text('Settings'), findsOneWidget);
+      expect(find.text('NETWORK & SYSTEM'), findsOneWidget);
+      expect(find.text('PREFERENCES & DATA'), findsOneWidget);
+      expect(find.text('ABOUT'), findsOneWidget);
 
-      // 2. Sections
+      // Verify the 5 Hub Navigation Tiles exist
+      expect(find.text('Live Speed & Monitoring'), findsOneWidget);
+      expect(find.text('Battery & System Health'), findsOneWidget);
+      expect(find.text('Appearance'), findsOneWidget);
+      expect(find.text('Data & Storage Management'), findsOneWidget);
+      expect(find.text('About ByteFlow'), findsOneWidget);
+
+      // --- SUB-SCREEN 1: Live Speed & Monitoring ---
+      await tester.tap(find.text('Live Speed & Monitoring'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LiveSpeedSettingsView), findsOneWidget);
       expect(find.byType(StatusBarSettingsTile), findsOneWidget);
-      expect(find.byType(BatterySaverCard), findsOneWidget);
-      expect(find.byType(PermissionHealthCard), findsOneWidget);
-      expect(find.byType(DataManagementCard), findsOneWidget);
 
-      // 3. Status bar speed toggle
+      // Toggle live speed switch
       final liveSpeedSwitch = find.byType(Switch);
       expect(liveSpeedSwitch, findsOneWidget);
       await tester.tap(liveSpeedSwitch);
       await tester.pumpAndSettle();
       expect(viewModel.isLiveSpeedEnabled, isTrue);
 
-      // 4. Test Export Usage Report dialog
+      // Pop back to Hub
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsView), findsOneWidget);
+
+      // --- SUB-SCREEN 2: Battery & System Health ---
+      await tester.tap(find.text('Battery & System Health'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SystemHealthSettingsView), findsOneWidget);
+      expect(find.byType(BatterySaverCard), findsOneWidget);
+      expect(find.byType(PermissionHealthCard), findsOneWidget);
+
+      // Pop back to Hub
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsView), findsOneWidget);
+
+      // --- SUB-SCREEN 3: Appearance ---
+      await tester.tap(find.text('Appearance'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AppearanceSettingsView), findsOneWidget);
+      expect(find.text('Dark Mode (OLED)'), findsOneWidget);
+
+      // Select Dark Mode
+      await tester.tap(find.text('Dark Mode (OLED)'));
+      await tester.pumpAndSettle();
+      expect(viewModel.themeMode, ThemeMode.dark);
+
+      // Pop back to Hub
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsView), findsOneWidget);
+
+      // --- SUB-SCREEN 4: Data & Storage Management ---
+      await tester.tap(find.text('Data & Storage Management'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DataPrivacySettingsView), findsOneWidget);
+      expect(find.byType(DataManagementCard), findsOneWidget);
+
+      // Test Export Usage Report dialog
       final exportTile = find.text('Export Usage Report');
       expect(exportTile, findsOneWidget);
       await tester.tap(exportTile);
@@ -75,7 +133,7 @@ void main() {
       await tester.tap(closeBtn);
       await tester.pumpAndSettle();
 
-      // 5. Test Clear Cached History confirmation dialog
+      // Test Clear Cached History confirmation dialog
       final clearCacheTile = find.text('Clear Cached History');
       expect(clearCacheTile, findsOneWidget);
       await tester.tap(clearCacheTile);
@@ -87,8 +145,23 @@ void main() {
       await tester.tap(cancelBtn);
       await tester.pumpAndSettle();
 
-      // 6. Open Source Licenses tile
+      // Pop back to Hub
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsView), findsOneWidget);
+
+      // --- SUB-SCREEN 5: About ByteFlow ---
+      await tester.tap(find.text('About ByteFlow'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AboutSettingsView), findsOneWidget);
+      expect(find.text('Version 1.0.0 (Production Build)'), findsOneWidget);
       expect(find.text('Open Source Licenses'), findsOneWidget);
+
+      // Pop back to Hub
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsView), findsOneWidget);
     });
   });
 }

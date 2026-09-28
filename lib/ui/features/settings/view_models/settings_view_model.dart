@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import '../../../../data/services/native_network_service.dart';
 import '../../../../domain/repositories/i_settings_repository.dart';
 import '../../../../domain/use_cases/toggle_live_speed_use_case.dart';
@@ -25,6 +25,9 @@ class SettingsViewModel extends ChangeNotifier {
 
   bool _isSpeedUnitBits = false;
   bool get isSpeedUnitBits => _isSpeedUnitBits;
+
+  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode get themeMode => _themeMode;
 
   bool _hasUsagePermission = false;
   bool get hasUsagePermission => _hasUsagePermission;
@@ -65,6 +68,12 @@ class SettingsViewModel extends ChangeNotifier {
       final unitResult = await _settingsRepository.isSpeedUnitBits();
       unitResult.when(
         success: (useBits) => _isSpeedUnitBits = useBits,
+        failure: (_) {},
+      );
+
+      final themeResult = await _settingsRepository.getThemeMode();
+      themeResult.when(
+        success: (mode) => _themeMode = mode,
         failure: (_) {},
       );
 
@@ -132,6 +141,13 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
 
     await _settingsRepository.setSpeedUnitBits(useBits);
+  }
+
+  Future<void> setThemeMode(ThemeMode mode) async {
+    _themeMode = mode;
+    notifyListeners();
+
+    await _settingsRepository.setThemeMode(mode);
   }
 
   Future<void> openUsageSettings() async {

@@ -135,4 +135,14 @@ class LocalPreferencesService {
   Future<void> setLastColdStartBackfillMs(int timestampMs) async {
     await _prefs.setInt(StorageKeys.keyLastColdStartBackfillMs, timestampMs);
   }
+
+  /// Returns persisted theme mode identifier ('system', 'light', or 'dark').
+  String getThemeMode() {
+    return _prefs.getString(StorageKeys.keyThemeMode) ?? 'system';
+  }
+
+  /// Persists preferred theme mode identifier.
+  Future<void> setThemeMode(String mode) async {
+    await _prefs.setString(StorageKeys.keyThemeMode, mode);
+  }
 }

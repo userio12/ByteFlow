@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
+import '../../../../core/theme/app_icons.dart';
 import '../view_models/settings_view_model.dart';
-import '../widgets/battery_saver_card.dart';
-import '../widgets/data_management_card.dart';
-import '../widgets/permission_health_card.dart';
-import '../widgets/privacy_guarantee_tile.dart';
-import '../widgets/status_bar_settings_tile.dart';
+import 'about_settings_view.dart';
+import 'appearance_settings_view.dart';
+import 'data_privacy_settings_view.dart';
+import 'live_speed_settings_view.dart';
+import 'system_health_settings_view.dart';
 
-/// The Settings view allowing configuration of live speed status bar notifications,
-/// reviewing battery preservation architecture, and checking system permissions health.
+/// The root Settings hub organizing ByteFlow into 5 modular nested sub-screens:
+/// 1. Live Speed & Monitoring
+/// 2. Battery & System Health
+/// 3. Data & Storage Management
+/// 4. Appearance
+/// 5. About ByteFlow
 class SettingsView extends StatefulWidget {
   final SettingsViewModel viewModel;
 
@@ -27,6 +32,12 @@ class _SettingsViewState extends State<SettingsView> {
     widget.viewModel.init();
   }
 
+  void _navigateTo(Widget screen) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => screen),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -36,6 +47,21 @@ class _SettingsViewState extends State<SettingsView> {
       listenable: widget.viewModel,
       builder: (context, _) {
         final vm = widget.viewModel;
+
+        // Subtitle dynamic statuses
+        final liveSpeedStatus = vm.isLiveSpeedEnabled
+            ? 'Active · ${(vm.samplingIntervalMs / 1000).toStringAsFixed(1)}s'
+            : 'Disabled';
+
+        final batteryStatus = vm.isBatteryOptimizationsIgnored
+            ? 'Whitelisted · Active'
+            : 'Optimized · Tap to review';
+
+        final themeStatus = switch (vm.themeMode) {
+          ThemeMode.system => 'System Default',
+          ThemeMode.light => 'Light Mode',
+          ThemeMode.dark => 'Dark Mode (OLED)',
+        };
 
         return Scaffold(
           appBar: AppBar(
@@ -50,73 +76,107 @@ class _SettingsViewState extends State<SettingsView> {
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             children: [
-              // 1. Status Bar Live Speed Service Tile
-              StatusBarSettingsTile(
-                isLiveSpeedEnabled: vm.isLiveSpeedEnabled,
-                onToggleLiveSpeed: vm.toggleLiveSpeed,
-                samplingIntervalMs: vm.samplingIntervalMs,
-                onIntervalChanged: vm.setSamplingInterval,
-                isSpeedUnitBits: vm.isSpeedUnitBits,
-                onUnitChanged: vm.setSpeedUnitBits,
-              ),
-              const SizedBox(height: 12),
-
-              // 2. Battery Saver (ACTION_SCREEN_OFF) Explanation & OEM Defense
-              BatterySaverCard(
-                isBatteryOptimizationsIgnored: vm.isBatteryOptimizationsIgnored,
-                onRequestExemption: vm.requestBatteryOptimizationExemption,
-              ),
-              const SizedBox(height: 12),
-
-              // 3. Permissions Health Card
-              PermissionHealthCard(
-                hasUsagePermission: vm.hasUsagePermission,
-                hasPhoneStatePermission: vm.hasPhoneStatePermission,
-                onOpenUsageSettings: vm.openUsageSettings,
-              ),
-              const SizedBox(height: 12),
-
-              // 4. Data Management & Backup
-              DataManagementCard(
-                onExportData: vm.exportUsageData,
-                onClearCache: vm.clearHistoricalCache,
-              ),
-              const SizedBox(height: 12),
-
-              // 5. Privacy Guarantee Pledge
-              const PrivacyGuaranteeTile(),
-              const SizedBox(height: 16),
-
-              // 6. Open Source Licenses & Legal
+              // Group 1: Network & Monitoring
+              _buildSectionHeader(theme, 'NETWORK & SYSTEM'),
               Card(
                 elevation: 0,
                 color: colorScheme.surfaceContainer,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: BorderSide(color: colorScheme.outlineVariant.withValues(alpha: 0.5)),
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  ),
                 ),
-                child: ListTile(
-                  leading: Icon(Icons.description_outlined, color: colorScheme.primary),
-                  title: Text(
-                    'Open Source Licenses',
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
-                  ),
-                  subtitle: Text(
-                    'Third-party software libraries and notices',
-                    style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
-                  ),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: () {
-                    showLicensePage(
-                      context: context,
-                      applicationName: 'ByteFlow',
-                      applicationVersion: '1.0.0',
-                      applicationLegalese: '© 2026 ByteFlow Authors. Open source under Apache 2.0 / MIT.',
-                    );
-                  },
+                child: Column(
+                  children: [
+                    _buildSettingsTile(
+                      context,
+                      icon: AppIcons.trafficPulse,
+                      iconColor: colorScheme.primary,
+                      title: 'Live Speed & Monitoring',
+                      subtitle: liveSpeedStatus,
+                      onTap: () => _navigateTo(
+                        LiveSpeedSettingsView(viewModel: vm),
+                      ),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _buildSettingsTile(
+                      context,
+                      icon: Icons.battery_saver_rounded,
+                      iconColor: colorScheme.primary,
+                      title: 'Battery & System Health',
+                      subtitle: batteryStatus,
+                      onTap: () => _navigateTo(
+                        SystemHealthSettingsView(viewModel: vm),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
+
+              // Group 2: Preferences & Storage
+              _buildSectionHeader(theme, 'PREFERENCES & DATA'),
+              Card(
+                elevation: 0,
+                color: colorScheme.surfaceContainer,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    _buildSettingsTile(
+                      context,
+                      icon: Icons.palette_outlined,
+                      iconColor: colorScheme.secondary,
+                      title: 'Appearance',
+                      subtitle: themeStatus,
+                      onTap: () => _navigateTo(
+                        AppearanceSettingsView(viewModel: vm),
+                      ),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _buildSettingsTile(
+                      context,
+                      icon: Icons.storage_rounded,
+                      iconColor: colorScheme.secondary,
+                      title: 'Data & Storage Management',
+                      subtitle: 'CSV export, SQLite cache & privacy pledge',
+                      onTap: () => _navigateTo(
+                        DataPrivacySettingsView(viewModel: vm),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Group 3: Information & Legal
+              _buildSectionHeader(theme, 'ABOUT'),
+              Card(
+                elevation: 0,
+                color: colorScheme.surfaceContainer,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                  ),
+                ),
+                child: _buildSettingsTile(
+                  context,
+                  icon: Icons.info_outline_rounded,
+                  iconColor: colorScheme.tertiary,
+                  title: 'About ByteFlow',
+                  subtitle: 'v1.0.0 · Architecture & open-source licenses',
+                  onTap: () => _navigateTo(
+                    const AboutSettingsView(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
 
               // Footer
               Center(
@@ -134,6 +194,62 @@ class _SettingsViewState extends State<SettingsView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSectionHeader(ThemeData theme, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8.0, bottom: 8.0),
+      child: Text(
+        title,
+        style: theme.textTheme.labelMedium?.copyWith(
+          fontWeight: FontWeight.bold,
+          letterSpacing: 0.8,
+          color: theme.colorScheme.onSurfaceVariant,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsTile(
+    BuildContext context, {
+    required IconData icon,
+    required Color iconColor,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return ListTile(
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+      leading: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: iconColor.withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Icon(icon, color: iconColor, size: 20),
+      ),
+      title: Text(
+        title,
+        style: theme.textTheme.titleMedium?.copyWith(
+          fontWeight: FontWeight.w600,
+          fontSize: 15,
+        ),
+      ),
+      subtitle: Text(
+        subtitle,
+        style: theme.textTheme.bodySmall?.copyWith(
+          color: colorScheme.onSurfaceVariant,
+        ),
+      ),
+      trailing: Icon(
+        Icons.chevron_right_rounded,
+        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+      ),
+      onTap: onTap,
     );
   }
 }

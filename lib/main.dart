@@ -81,6 +81,9 @@ class ByteFlowApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final settingsVm = context.watch<SettingsViewModel?>();
+    final themeMode = settingsVm?.themeMode ?? ThemeMode.system;
+
     return DynamicColorBuilder(
       builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
         return MaterialApp(
@@ -97,7 +100,7 @@ class ByteFlowApp extends StatelessWidget {
           supportedLocales: AppLocalizations.supportedLocales,
           theme: AppTheme.lightTheme(lightDynamic?.harmonized()),
           darkTheme: AppTheme.darkTheme(darkDynamic?.harmonized()),
-          themeMode: ThemeMode.system,
+          themeMode: themeMode,
           home: const AppRootRouter(),
         );
       },

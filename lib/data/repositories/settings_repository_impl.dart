@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../core/errors/app_failure.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/functional/result.dart';
@@ -130,6 +132,38 @@ class SettingsRepositoryImpl implements ISettingsRepository {
     } catch (e) {
       return Result.failure(
         CacheFailure(message: 'Failed to persist onboarding state: $e'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<ThemeMode, AppFailure>> getThemeMode() async {
+    try {
+      final modeStr = _preferencesService.getThemeMode();
+      final mode = switch (modeStr) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      };
+      return Result.success(mode);
+    } catch (e) {
+      return const Result.success(ThemeMode.system);
+    }
+  }
+
+  @override
+  Future<Result<void, AppFailure>> setThemeMode(ThemeMode mode) async {
+    try {
+      final modeStr = switch (mode) {
+        ThemeMode.light => 'light',
+        ThemeMode.dark => 'dark',
+        ThemeMode.system => 'system',
+      };
+      await _preferencesService.setThemeMode(modeStr);
+      return const Result.success(null);
+    } catch (e) {
+      return Result.failure(
+        CacheFailure(message: 'Failed to persist theme mode: $e'),
       );
     }
   }

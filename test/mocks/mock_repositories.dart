@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:byteflow/core/errors/app_failure.dart';
 import 'package:byteflow/core/functional/result.dart';
 import 'package:byteflow/domain/models/app_usage_entity.dart';
@@ -254,6 +255,21 @@ class FakeSettingsRepository implements ISettingsRepository {
   Future<Result<void, AppFailure>> setOnboardingCompleted(bool completed) async {
     if (errorToReturn != null) return Result.failure(errorToReturn!);
     onboardingCompleted = completed;
+    return const Result.success(null);
+  }
+
+  ThemeMode themeMode = ThemeMode.system;
+
+  @override
+  Future<Result<ThemeMode, AppFailure>> getThemeMode() async {
+    if (errorToReturn != null) return Result.failure(errorToReturn!);
+    return Result.success(themeMode);
+  }
+
+  @override
+  Future<Result<void, AppFailure>> setThemeMode(ThemeMode mode) async {
+    if (errorToReturn != null) return Result.failure(errorToReturn!);
+    themeMode = mode;
     return const Result.success(null);
   }
 

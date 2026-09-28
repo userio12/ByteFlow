@@ -25,4 +25,7 @@ abstract final class StorageKeys {
   // Cold Start & Synchronization Metadata
   static const String keyLastColdStartBackfillMs = 'byteflow_last_cold_start_backfill_ms';
   static const String keyLastKnownCarrier = 'byteflow_last_known_carrier';
+
+  // Appearance & Theme Preferences
+  static const String keyThemeMode = 'byteflow_theme_mode';
 }

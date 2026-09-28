@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import '../../core/errors/app_failure.dart';
 import '../../core/functional/result.dart';
 
@@ -29,6 +31,12 @@ abstract interface class ISettingsRepository {
 
   /// Marks the onboarding flow as completed.
   Future<Result<void, AppFailure>> setOnboardingCompleted(bool completed);
+
+  /// Queries the persisted theme mode.
+  Future<Result<ThemeMode, AppFailure>> getThemeMode();
+
+  /// Configures and persists the theme mode.
+  Future<Result<void, AppFailure>> setThemeMode(ThemeMode mode);
 
   /// Exports stored usage data into a CSV string for user audit/backup.
   Future<Result<String, AppFailure>> exportUsageDataAsCsv();
