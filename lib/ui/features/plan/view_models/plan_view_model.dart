@@ -150,10 +150,11 @@ class PlanViewModel extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
+    bool success = false;
     try {
       if (_selectedCategory == PlanCategory.cellular) {
         final result = await _saveDataPlanUseCase(newPlan);
-        return result.fold(
+        success = result.fold(
           (_) {
             _cellularPlan = newPlan;
             return true;
@@ -166,7 +167,7 @@ class PlanViewModel extends ChangeNotifier {
       } else {
         if (_planRepository != null) {
           final result = await _planRepository.saveWifiPlan(newPlan);
-          return result.fold(
+          success = result.fold(
             (_) {
               _wifiPlan = newPlan;
               return true;
@@ -178,12 +179,13 @@ class PlanViewModel extends ChangeNotifier {
           );
         } else {
           _wifiPlan = newPlan;
-          return true;
+          success = true;
         }
       }
     } finally {
       _isLoading = false;
       notifyListeners();
     }
+    return success;
   }
 }

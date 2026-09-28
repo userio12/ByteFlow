@@ -63,7 +63,7 @@ class NetworkRepositoryImpl implements INetworkRepository {
       final startMs = bounds.start.millisecondsSinceEpoch;
       final endMs = bounds.end.millisecondsSinceEpoch;
 
-      return switch (range) {
+      return await switch (range) {
         TimeRange.today => _buildTodaySummary(bounds, startMs, endMs),
         TimeRange.week => _buildWeeklySummary(bounds),
         TimeRange.month => _buildMonthlySummary(bounds),
