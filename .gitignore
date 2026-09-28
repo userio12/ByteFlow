@@ -33,7 +33,7 @@ migrate_working_dir/
 **/android/**/GeneratedPluginRegistrant.java
 **/android/.gradle
 **/android/captures/
-**/android/gradle/wrapper/gradle-wrapper.jar
+!**/android/gradle/wrapper/gradle-wrapper.jar
 !**/android/gradle/wrapper/gradle-wrapper.properties
 
 # AndroidPE & Agent Analysis Artifacts
