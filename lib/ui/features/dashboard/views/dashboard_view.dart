@@ -15,6 +15,7 @@ import '../widgets/speed_pulse_card.dart';
 class DashboardView extends StatefulWidget {
   final DashboardViewModel viewModel;
   final bool useBits;
+  final VoidCallback? onNavigateToApps;
   final VoidCallback? onNavigateToPlan;
   final VoidCallback? onOpenSettings;
 
@@ -22,6 +23,7 @@ class DashboardView extends StatefulWidget {
     super.key,
     required this.viewModel,
     this.useBits = false,
+    this.onNavigateToApps,
     this.onNavigateToPlan,
     this.onOpenSettings,
   });

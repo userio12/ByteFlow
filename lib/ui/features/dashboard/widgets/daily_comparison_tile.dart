@@ -21,9 +21,6 @@ class DailyComparisonTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
     final mobileTotal = summary.mobileTotal;
     final mobileDown = ByteFormatter.format(summary.mobileRx);
     final mobileUp = ByteFormatter.format(summary.mobileTx);

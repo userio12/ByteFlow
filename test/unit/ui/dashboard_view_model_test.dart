@@ -1,7 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:byteflow/domain/models/data_plan_entity.dart';
 import 'package:byteflow/domain/models/network_summary_entity.dart';
-import 'package:byteflow/domain/models/sim_info_entity.dart';
 import 'package:byteflow/domain/use_cases/get_active_sim_info_use_case.dart';
 import 'package:byteflow/domain/use_cases/get_data_plan_use_case.dart';
 import 'package:byteflow/domain/use_cases/get_today_usage_use_case.dart';
