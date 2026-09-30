@@ -96,11 +96,28 @@ class AppDetailsBottomSheet extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      'Linux UID: ${app.uid}',
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
-                      ),
+                    Row(
+                      children: [
+                        Text(
+                          'Linux UID: ${app.uid}',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        Text(
+                          ' • ',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        Text(
+                          app.isSystemApp ? 'System App' : 'User Installed App',
+                          style: theme.textTheme.labelSmall?.copyWith(
+                            color: app.isSystemApp ? colorScheme.tertiary : colorScheme.primary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

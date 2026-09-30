@@ -12,6 +12,7 @@ class AppUsageDto {
   final int backgroundRx;
   final int backgroundTx;
   final String? appIconBase64;
+  final bool isSystemApp;
 
   const AppUsageDto({
     required this.uid,
@@ -24,6 +25,7 @@ class AppUsageDto {
     this.backgroundRx = 0,
     this.backgroundTx = 0,
     this.appIconBase64,
+    this.isSystemApp = false,
   });
 
   /// Pattern-matched deserialization from native Platform Channel or SQLite map.
@@ -45,6 +47,7 @@ class AppUsageDto {
           backgroundRx: (map['backgroundRx'] as num?)?.toInt() ?? 0,
           backgroundTx: (map['backgroundTx'] as num?)?.toInt() ?? 0,
           appIconBase64: map['appIconBase64'] as String?,
+          isSystemApp: (map['isSystemApp'] as bool?) ?? (uid.toInt() < 10000),
         ),
       _ => throw FormatException('Invalid AppUsageDto payload: $map'),
     };
@@ -64,6 +67,7 @@ class AppUsageDto {
       'backgroundRx': backgroundRx,
       'backgroundTx': backgroundTx,
       'appIconBase64': appIconBase64,
+      'isSystemApp': isSystemApp,
     };
   }
 
@@ -80,6 +84,7 @@ class AppUsageDto {
       backgroundRx: backgroundRx,
       backgroundTx: backgroundTx,
       appIconBase64: appIconBase64,
+      isSystemApp: isSystemApp,
     );
   }
 
@@ -96,6 +101,7 @@ class AppUsageDto {
       backgroundRx: entity.backgroundRx,
       backgroundTx: entity.backgroundTx,
       appIconBase64: entity.appIconBase64,
+      isSystemApp: entity.isSystemApp,
     );
   }
 }

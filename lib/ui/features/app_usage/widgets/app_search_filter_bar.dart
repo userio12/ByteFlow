@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/channel_constants.dart';
 import '../../../../core/theme/app_icons.dart';
+import '../../../../domain/models/app_type_filter.dart';
 import '../../../../domain/models/time_range.dart';
 import '../../../core/widgets/time_range_segmented_button.dart';
 
-/// Search input bar coupled with network type chips and multi-timeframe segmented switcher.
+/// Search input bar coupled with network type chips, app type chips, and multi-timeframe segmented switcher.
 class AppSearchFilterBar extends StatefulWidget {
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
@@ -12,6 +13,8 @@ class AppSearchFilterBar extends StatefulWidget {
   final ValueChanged<int> onNetworkTypeChanged;
   final TimeRange selectedRange;
   final ValueChanged<TimeRange> onRangeChanged;
+  final AppTypeFilter selectedAppType;
+  final ValueChanged<AppTypeFilter> onAppTypeChanged;
 
   const AppSearchFilterBar({
     super.key,
@@ -21,6 +24,8 @@ class AppSearchFilterBar extends StatefulWidget {
     required this.onNetworkTypeChanged,
     required this.selectedRange,
     required this.onRangeChanged,
+    required this.selectedAppType,
+    required this.onAppTypeChanged,
   });
 
   @override
@@ -98,34 +103,78 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
           const SizedBox(height: 10),
 
           // 3. Network Filter Chips
-          Row(
-            children: [
-              Text(
-                'Network: ',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  fontWeight: FontWeight.w600,
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Text(
+                  'Network: ',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              _buildNetworkChip(
-                label: 'All',
-                type: ChannelConstants.networkTypeAll,
-                colorScheme: colorScheme,
-              ),
-              const SizedBox(width: 6),
-              _buildNetworkChip(
-                label: 'Mobile',
-                type: ChannelConstants.networkTypeMobile,
-                colorScheme: colorScheme,
-              ),
-              const SizedBox(width: 6),
-              _buildNetworkChip(
-                label: 'Wi-Fi',
-                type: ChannelConstants.networkTypeWifi,
-                colorScheme: colorScheme,
-              ),
-            ],
+                const SizedBox(width: 6),
+                _buildNetworkChip(
+                  label: 'All',
+                  icon: null,
+                  type: ChannelConstants.networkTypeAll,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 6),
+                _buildNetworkChip(
+                  label: 'Mobile',
+                  icon: AppIcons.cellular,
+                  type: ChannelConstants.networkTypeMobile,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 6),
+                _buildNetworkChip(
+                  label: 'Wi-Fi',
+                  icon: AppIcons.wifi,
+                  type: ChannelConstants.networkTypeWifi,
+                  colorScheme: colorScheme,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 6),
+
+          // 4. App Type Filter Chips (Installed / System / All)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Text(
+                  'Apps: ',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(width: 24),
+                _buildAppTypeChip(
+                  label: 'Installed',
+                  icon: Icons.download_done_rounded,
+                  filter: AppTypeFilter.userInstalled,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 6),
+                _buildAppTypeChip(
+                  label: 'System',
+                  icon: Icons.android_rounded,
+                  filter: AppTypeFilter.system,
+                  colorScheme: colorScheme,
+                ),
+                const SizedBox(width: 6),
+                _buildAppTypeChip(
+                  label: 'All',
+                  icon: Icons.apps_rounded,
+                  filter: AppTypeFilter.all,
+                  colorScheme: colorScheme,
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -134,15 +183,48 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
 
   Widget _buildNetworkChip({
     required String label,
+    required IconData? icon,
     required int type,
     required ColorScheme colorScheme,
   }) {
     final isSelected = widget.selectedNetworkType == type;
 
     return ChoiceChip(
+      avatar: icon != null
+          ? Icon(
+              icon,
+              size: 15,
+              color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+            )
+          : null,
       label: Text(label),
       selected: isSelected,
       onSelected: (_) => widget.onNetworkTypeChanged(type),
+      visualDensity: VisualDensity.compact,
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
+    );
+  }
+
+  Widget _buildAppTypeChip({
+    required String label,
+    required IconData icon,
+    required AppTypeFilter filter,
+    required ColorScheme colorScheme,
+  }) {
+    final isSelected = widget.selectedAppType == filter;
+
+    return ChoiceChip(
+      avatar: Icon(
+        icon,
+        size: 15,
+        color: isSelected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+      ),
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => widget.onAppTypeChanged(filter),
       visualDensity: VisualDensity.compact,
       labelStyle: TextStyle(
         fontSize: 12,

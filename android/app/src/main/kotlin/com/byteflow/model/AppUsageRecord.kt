@@ -13,7 +13,8 @@ data class AppUsageRecord(
     var foregroundTx: Long = 0L,
     var backgroundRx: Long = 0L,
     var backgroundTx: Long = 0L,
-    var appIconBase64: String? = null
+    var appIconBase64: String? = null,
+    val isSystemApp: Boolean = false
 ) {
     val totalBytes: Long
         get() = rxBytes + txBytes
@@ -38,7 +39,8 @@ data class AppUsageRecord(
             "backgroundRx" to backgroundRx,
             "backgroundTx" to backgroundTx,
             "backgroundBytes" to backgroundBytes,
-            "appIconBase64" to appIconBase64
+            "appIconBase64" to appIconBase64,
+            "isSystemApp" to isSystemApp
         )
     }
 }

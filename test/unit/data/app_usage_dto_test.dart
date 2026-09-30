@@ -27,6 +27,17 @@ void main() {
       expect(dto.foregroundRx, equals(800000));
       expect(dto.backgroundTx, equals(124288));
       expect(dto.appIconBase64, equals('mock_base64_data'));
+      expect(dto.isSystemApp, isFalse);
+    });
+
+    test('deserializes system UID as system app via fallback', () {
+      final systemMap = {
+        'uid': 1000,
+        'packageName': 'android.uid.system',
+        'appName': 'Android System',
+      };
+      final dto = AppUsageDto.fromMap(systemMap);
+      expect(dto.isSystemApp, isTrue);
     });
 
     test('serializes to Map correctly', () {
@@ -38,6 +49,7 @@ void main() {
       expect(map['appName'], equals('Chrome'));
       expect(map['totalBytes'], equals(1048576 + 524288));
       expect(map['appIconBase64'], equals('mock_base64_data'));
+      expect(map['isSystemApp'], isFalse);
     });
 
     test('converts to and from domain AppUsageEntity', () {
@@ -47,11 +59,13 @@ void main() {
       expect(entity.uid, equals(dto.uid));
       expect(entity.packageName, equals(dto.packageName));
       expect(entity.totalBytes, equals(dto.rxBytes + dto.txBytes));
+      expect(entity.isSystemApp, equals(dto.isSystemApp));
 
       final roundtripDto = AppUsageDto.fromEntity(entity);
       expect(roundtripDto.uid, equals(dto.uid));
       expect(roundtripDto.packageName, equals(dto.packageName));
       expect(roundtripDto.rxBytes, equals(dto.rxBytes));
+      expect(roundtripDto.isSystemApp, equals(dto.isSystemApp));
     });
 
     test('throws FormatException on malformed map', () {

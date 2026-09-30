@@ -41,6 +41,14 @@ void main() {
         backgroundRx: 8000000,
         backgroundTx: 1000000,
       ),
+      const AppUsageEntity(
+        uid: 1000,
+        packageName: 'android.uid.system',
+        appName: 'Android System',
+        rxBytes: 5242880,  // 5 MB
+        txBytes: 1048576,  // 1 MB
+        isSystemApp: true,
+      ),
     ];
 
     setUp(() {
@@ -65,36 +73,70 @@ void main() {
       expect(find.text('App Data Usage'), findsOneWidget);
       expect(find.byType(AppSearchFilterBar), findsOneWidget);
 
-      // 2. Verify all 3 mock apps render initially
+      // 2. Verify filter chips are rendered
+      expect(find.text('Installed'), findsOneWidget);
+      expect(find.text('System'), findsOneWidget);
+      expect(find.text('All'), findsNWidgets(2)); // Network All and Apps All
+      expect(find.text('Mobile'), findsOneWidget);
+      expect(find.text('Wi-Fi'), findsOneWidget);
+
+      // 3. By default (Installed filter), user apps render and system app is hidden
       expect(find.text('YouTube'), findsOneWidget);
       expect(find.text('Chrome'), findsOneWidget);
       expect(find.text('Telegram'), findsOneWidget);
+      expect(find.text('Android System'), findsNothing);
 
-      // 3. Enter search query for 'Chrome'
+      // 4. Switch to System apps filter
+      await tester.tap(find.text('System'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Android System'), findsOneWidget);
+      expect(find.text('SYSTEM'), findsOneWidget); // System badge on tile
+      expect(find.text('YouTube'), findsNothing);
+      expect(find.text('Chrome'), findsNothing);
+      expect(find.text('Telegram'), findsNothing);
+
+      // 5. Switch to Apps "All" filter
+      final allChips = find.text('All');
+      await tester.tap(allChips.last); // Apps All chip
+      await tester.pumpAndSettle();
+
+      expect(find.text('YouTube'), findsOneWidget);
+      expect(find.text('Chrome'), findsOneWidget);
+      expect(find.text('Telegram'), findsOneWidget);
+      expect(find.text('Android System'), findsOneWidget);
+
+      // 6. Switch back to "Installed"
+      await tester.tap(find.text('Installed'));
+      await tester.pumpAndSettle();
+      expect(find.text('Android System'), findsNothing);
+
+      // 7. Enter search query for 'Chrome'
       final searchField = find.byType(TextField);
       expect(searchField, findsOneWidget);
       await tester.enterText(searchField, 'Chrome');
       await tester.pumpAndSettle();
 
-      // 4. Verify filtered state: only Chrome is visible
+      // Verify filtered state: only Chrome is visible
       expect(find.text('Chrome'), findsOneWidget);
       expect(find.text('YouTube'), findsNothing);
       expect(find.text('Telegram'), findsNothing);
 
-      // 5. Clear search query: all apps return
+      // 8. Clear search query: all user apps return
       await tester.enterText(searchField, '');
       await tester.pumpAndSettle();
       expect(find.text('YouTube'), findsOneWidget);
       expect(find.text('Chrome'), findsOneWidget);
       expect(find.text('Telegram'), findsOneWidget);
 
-      // 6. Tap Chrome tile to open details bottom sheet
+      // 9. Tap Chrome tile to open details bottom sheet
       await tester.tap(find.text('Chrome'));
       await tester.pumpAndSettle();
 
-      // Verify bottom sheet appears with app details
+      // Verify bottom sheet appears with app details and app type
       expect(find.text('Foreground Rx / Tx'), findsOneWidget);
       expect(find.text('Background Rx / Tx'), findsOneWidget);
+      expect(find.text('User Installed App'), findsOneWidget);
     });
   });
 }

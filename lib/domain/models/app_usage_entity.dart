@@ -10,6 +10,7 @@ class AppUsageEntity {
   final int backgroundRx;
   final int backgroundTx;
   final String? appIconBase64;
+  final bool isSystemApp;
 
   const AppUsageEntity({
     required this.uid,
@@ -22,6 +23,7 @@ class AppUsageEntity {
     this.backgroundRx = 0,
     this.backgroundTx = 0,
     this.appIconBase64,
+    this.isSystemApp = false,
   });
 
   int get totalBytes => rxBytes + txBytes;
@@ -46,7 +48,8 @@ class AppUsageEntity {
           foregroundRx == other.foregroundRx &&
           foregroundTx == other.foregroundTx &&
           backgroundRx == other.backgroundRx &&
-          backgroundTx == other.backgroundTx;
+          backgroundTx == other.backgroundTx &&
+          isSystemApp == other.isSystemApp;
 
   @override
   int get hashCode => Object.hash(
@@ -58,9 +61,10 @@ class AppUsageEntity {
         foregroundTx,
         backgroundRx,
         backgroundTx,
+        isSystemApp,
       );
 
   @override
   String toString() =>
-      'AppUsageEntity(pkg: $packageName, total: $totalBytes, fg: $foregroundBytes, bg: $backgroundBytes)';
+      'AppUsageEntity(pkg: $packageName, total: $totalBytes, fg: $foregroundBytes, bg: $backgroundBytes, isSystem: $isSystemApp)';
 }

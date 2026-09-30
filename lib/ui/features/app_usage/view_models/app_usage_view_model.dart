@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../../core/constants/channel_constants.dart';
+import '../../../../domain/models/app_type_filter.dart';
 import '../../../../domain/models/app_usage_entity.dart';
 import '../../../../domain/models/time_range.dart';
 import '../../../../domain/use_cases/get_app_breakdown_use_case.dart';
@@ -17,6 +18,9 @@ class AppUsageViewModel extends ChangeNotifier {
 
   int _selectedNetworkType = ChannelConstants.networkTypeAll;
   int get selectedNetworkType => _selectedNetworkType;
+
+  AppTypeFilter _selectedAppType = AppTypeFilter.userInstalled;
+  AppTypeFilter get selectedAppType => _selectedAppType;
 
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
@@ -54,6 +58,14 @@ class AppUsageViewModel extends ChangeNotifier {
     }
   }
 
+  void setAppType(AppTypeFilter type) {
+    if (_selectedAppType != type) {
+      _selectedAppType = type;
+      _applyFilter();
+      notifyListeners();
+    }
+  }
+
   void setSearchQuery(String query) {
     _searchQuery = query.trim().toLowerCase();
     _applyFilter();
@@ -88,14 +100,29 @@ class AppUsageViewModel extends ChangeNotifier {
   }
 
   void _applyFilter() {
-    if (_searchQuery.isEmpty) {
-      _filteredApps = List.of(_allApps);
-    } else {
-      _filteredApps = _allApps.where((app) {
+    Iterable<AppUsageEntity> filtered = _allApps;
+
+    // 1. App Type Filtering (User Installed vs System vs All)
+    switch (_selectedAppType) {
+      case AppTypeFilter.userInstalled:
+        filtered = filtered.where((app) => !app.isSystemApp);
+        break;
+      case AppTypeFilter.system:
+        filtered = filtered.where((app) => app.isSystemApp);
+        break;
+      case AppTypeFilter.all:
+        break;
+    }
+
+    // 2. Search Query Filtering
+    if (_searchQuery.isNotEmpty) {
+      filtered = filtered.where((app) {
         final nameMatch = app.appName.toLowerCase().contains(_searchQuery);
         final pkgMatch = app.packageName.toLowerCase().contains(_searchQuery);
         return nameMatch || pkgMatch;
-      }).toList();
+      });
     }
+
+    _filteredApps = filtered.toList();
   }
 }

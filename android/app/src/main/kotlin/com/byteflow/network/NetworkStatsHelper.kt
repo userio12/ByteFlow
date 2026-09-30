@@ -6,6 +6,7 @@ import android.app.usage.NetworkStats
 import android.app.usage.NetworkStatsManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.Uri
@@ -229,10 +230,12 @@ object NetworkStatsHelper {
                         val packages = pm.getPackagesForUid(uid)
                         val packageName = packages?.firstOrNull() ?: resolveSpecialUidPackage(uid)
                         val appName = resolveAppLabel(pm, packageName, uid)
+                        val isSystem = isSystemApp(pm, packageName, uid)
                         AppUsageRecord(
                             uid = uid,
                             packageName = packageName,
-                            appName = appName
+                            appName = appName,
+                            isSystemApp = isSystem
                         )
                     }
 
@@ -346,6 +349,20 @@ object NetworkStatsHelper {
             pm.getApplicationLabel(appInfo).toString()
         } catch (_: Exception) {
             packageName
+        }
+    }
+
+    private fun isSystemApp(pm: PackageManager, packageName: String, uid: Int): Boolean {
+        if (uid < Process.FIRST_APPLICATION_UID) return true
+        if (packageName == "android" || packageName.startsWith("android.") || packageName.startsWith("uid_")) {
+            return true
+        }
+        return try {
+            val appInfo = pm.getApplicationInfo(packageName, 0)
+            (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0 ||
+            (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+        } catch (_: Exception) {
+            uid < Process.FIRST_APPLICATION_UID
         }
     }
 }

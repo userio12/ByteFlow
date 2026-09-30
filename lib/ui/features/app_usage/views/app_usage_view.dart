@@ -59,6 +59,8 @@ class _AppUsageViewState extends State<AppUsageView> {
                 onNetworkTypeChanged: vm.setNetworkType,
                 selectedRange: vm.selectedRange,
                 onRangeChanged: vm.setTimeRange,
+                selectedAppType: vm.selectedAppType,
+                onAppTypeChanged: vm.setAppType,
               ),
 
               // Summary Banner
