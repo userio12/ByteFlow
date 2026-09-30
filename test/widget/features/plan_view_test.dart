@@ -83,5 +83,61 @@ void main() {
       expect(find.text('Configure Data Plan'), findsNothing);
       expect(find.text('Data plan updated successfully.'), findsOneWidget);
     });
+
+    testWidgets('renders empty SIM state when no SIM detected',
+        (WidgetTester tester) async {
+      fakeNetworkRepo.activeSims = const [];
+      final noSimViewModel = PlanViewModel(
+        getDataPlanUseCase: GetDataPlanUseCase(fakePlanRepo),
+        saveDataPlanUseCase: SaveDataPlanUseCase(fakePlanRepo),
+        getActiveSimInfoUseCase: GetActiveSimInfoUseCase(fakeNetworkRepo),
+        getTodayUsageUseCase: GetTodayUsageUseCase(fakeNetworkRepo),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: PlanView(viewModel: noSimViewModel),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Verify empty SIM card elements
+      expect(find.byType(CarrierStatusCard), findsOneWidget);
+      expect(find.text('CELLULAR CARRIER'), findsOneWidget);
+      expect(find.text('No SIM'), findsOneWidget);
+      expect(find.text('No SIM Card Detected'), findsOneWidget);
+      expect(
+        find.text('Insert a SIM card or grant Phone State permission.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('CarrierStatusCard renders without overflow on narrow viewport',
+        (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(360, 640);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: CarrierStatusCard(
+                activeSim: null,
+                allSims: [],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      expect(find.text('CELLULAR CARRIER'), findsOneWidget);
+      expect(find.text('No SIM Card Detected'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
   });
 }
