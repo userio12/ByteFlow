@@ -117,8 +117,8 @@ abstract final class DependencyInjection {
           getTodayUsageUseCase: context.read<GetTodayUsageUseCase>(),
           getActiveSimInfoUseCase: context.read<GetActiveSimInfoUseCase>(),
           getDataPlanUseCase: context.read<GetDataPlanUseCase>(),
-          networkRepository: context.read<INetworkRepository>(),
           nativeService: context.read<NativeNetworkService>(),
+          planRepository: context.read<IPlanRepository>(),
         ),
       ),
       ChangeNotifierProvider<AppUsageViewModel>(

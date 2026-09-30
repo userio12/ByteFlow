@@ -151,14 +151,23 @@ object NetworkStatsHelper {
             mobileTx = mobileBucket.txBytes
         } catch (_: Exception) {}
 
-        // Query Wi-Fi
+        // Query Wi-Fi with resilient fallback ("" standard for Wi-Fi, fallback to null)
         try {
-            val wifiBucket = nsm.querySummaryForDevice(
-                ConnectivityManager.TYPE_WIFI,
-                null,
-                startTimeMs,
-                endTimeMs
-            )
+            val wifiBucket = try {
+                nsm.querySummaryForDevice(
+                    ConnectivityManager.TYPE_WIFI,
+                    "",
+                    startTimeMs,
+                    endTimeMs
+                )
+            } catch (_: Exception) {
+                nsm.querySummaryForDevice(
+                    ConnectivityManager.TYPE_WIFI,
+                    null,
+                    startTimeMs,
+                    endTimeMs
+                )
+            }
             wifiRx = wifiBucket.rxBytes
             wifiTx = wifiBucket.txBytes
         } catch (_: Exception) {}
@@ -197,7 +206,20 @@ object NetworkStatsHelper {
 
         for (type in typesToQuery) {
             try {
-                val stats = nsm.querySummary(type, null, startTimeMs, endTimeMs)
+                val stats = try {
+                    if (type == ConnectivityManager.TYPE_WIFI) {
+                        try {
+                            nsm.querySummary(type, "", startTimeMs, endTimeMs)
+                        } catch (_: Exception) {
+                            nsm.querySummary(type, null, startTimeMs, endTimeMs)
+                        }
+                    } else {
+                        nsm.querySummary(type, null, startTimeMs, endTimeMs)
+                    }
+                } catch (_: Exception) {
+                    null
+                } ?: continue
+
                 val bucket = NetworkStats.Bucket()
 
                 while (stats.hasNextBucket()) {
@@ -274,7 +296,15 @@ object NetworkStatsHelper {
             var rx = 0L
             var tx = 0L
             try {
-                val bucket = nsm.querySummaryForDevice(actualNetworkType, null, cur, next)
+                val bucket = if (actualNetworkType == ConnectivityManager.TYPE_WIFI) {
+                    try {
+                        nsm.querySummaryForDevice(actualNetworkType, "", cur, next)
+                    } catch (_: Exception) {
+                        nsm.querySummaryForDevice(actualNetworkType, null, cur, next)
+                    }
+                } else {
+                    nsm.querySummaryForDevice(actualNetworkType, null, cur, next)
+                }
                 rx = bucket.rxBytes
                 tx = bucket.txBytes
             } catch (_: Exception) {}

@@ -3,19 +3,18 @@ import 'package:provider/provider.dart';
 import '../../../../core/theme/app_icons.dart';
 import '../../../../domain/models/network_summary_entity.dart';
 import '../../../core/widgets/carrier_badge.dart';
+import '../../plan/view_models/plan_view_model.dart';
 import '../../settings/view_models/settings_view_model.dart';
 import '../view_models/dashboard_view_model.dart';
 import '../widgets/daily_comparison_tile.dart';
 import '../widgets/plan_progress_ring.dart';
 import '../widgets/speed_pulse_card.dart';
-import '../widgets/top_apps_preview_card.dart';
 
 /// The primary Dashboard view presenting live network throughput, daily mobile/Wi-Fi splits,
 /// and monthly quota progress.
 class DashboardView extends StatefulWidget {
   final DashboardViewModel viewModel;
   final bool useBits;
-  final VoidCallback? onNavigateToApps;
   final VoidCallback? onNavigateToPlan;
   final VoidCallback? onOpenSettings;
 
@@ -23,7 +22,6 @@ class DashboardView extends StatefulWidget {
     super.key,
     required this.viewModel,
     this.useBits = false,
-    this.onNavigateToApps,
     this.onNavigateToPlan,
     this.onOpenSettings,
   });
@@ -110,22 +108,43 @@ class _DashboardViewState extends State<DashboardView> {
                       ),
                       const SizedBox(height: 12),
 
-                      // 2. Data Plan Progress Ring
+                      // 2. Network Category Segmented Selector
+                      SegmentedButton<PlanCategory>(
+                        segments: const [
+                          ButtonSegment<PlanCategory>(
+                            value: PlanCategory.cellular,
+                            label: Text('Cellular'),
+                            icon: Icon(AppIcons.cellular, size: 16),
+                          ),
+                          ButtonSegment<PlanCategory>(
+                            value: PlanCategory.wifi,
+                            label: Text('Wi-Fi'),
+                            icon: Icon(AppIcons.wifi, size: 16),
+                          ),
+                        ],
+                        selected: {vm.selectedCategory},
+                        onSelectionChanged: (selected) {
+                          if (selected.isNotEmpty) {
+                            vm.selectCategory(selected.first);
+                          }
+                        },
+                      ),
+                      const SizedBox(height: 12),
+
+                      // 3. Data Plan Progress Ring (Dynamic Cellular or Wi-Fi)
                       PlanProgressRing(
-                        plan: vm.dataPlan,
-                        usedMobileBytes: summary.mobileTotal,
+                        plan: vm.activePlan,
+                        usedMobileBytes: vm.activeUsedBytes,
+                        category: vm.selectedCategory,
                         onEditPlan: widget.onNavigateToPlan,
                       ),
                       const SizedBox(height: 12),
 
-                      // 3. Cellular vs Wi-Fi Today Split
-                      DailyComparisonTile(summary: summary),
-                      const SizedBox(height: 12),
-
-                      // 4. Top Consumers Today Preview
-                      TopAppsPreviewCard(
-                        apps: vm.topApps,
-                        onViewAll: widget.onNavigateToApps,
+                      // 4. Cellular vs Wi-Fi Today Split (Interactive Tap)
+                      DailyComparisonTile(
+                        summary: summary,
+                        selectedCategory: vm.selectedCategory,
+                        onSelectCategory: vm.selectCategory,
                       ),
                       const SizedBox(height: 24),
                     ],

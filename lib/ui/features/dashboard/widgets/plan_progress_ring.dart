@@ -5,17 +5,20 @@ import '../../../../core/utils/byte_formatter.dart';
 import '../../../../core/utils/date_utils.dart';
 import '../../../../domain/models/data_plan_entity.dart';
 import '../../../core/animations/radial_gauge.dart';
+import '../../plan/view_models/plan_view_model.dart';
 
 /// Widget displaying data plan progress ring, consumed/remaining quota, days left, and budget pace.
 class PlanProgressRing extends StatelessWidget {
   final DataPlanEntity plan;
   final int usedMobileBytes;
+  final PlanCategory category;
   final VoidCallback? onEditPlan;
 
   const PlanProgressRing({
     super.key,
     required this.plan,
     required this.usedMobileBytes,
+    this.category = PlanCategory.cellular,
     this.onEditPlan,
   });
 
@@ -23,6 +26,10 @@ class PlanProgressRing extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isWifi = category == PlanCategory.wifi;
+    final categoryLabel = isWifi ? 'WI-FI' : 'CELLULAR';
+    final categoryIcon = isWifi ? AppIcons.wifi : AppIcons.planActive;
+    final categoryColor = isWifi ? AppColors.wifi : colorScheme.primary;
 
     final percent = plan.usagePercent(usedMobileBytes) / 100.0;
     final remainingBytes = plan.remainingBytes(usedMobileBytes);
@@ -61,10 +68,10 @@ class PlanProgressRing extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    Icon(AppIcons.planActive, size: 18, color: colorScheme.primary),
+                    Icon(categoryIcon, size: 18, color: categoryColor),
                     const SizedBox(width: 8),
                     Text(
-                      '${plan.cycleType.displayName.toUpperCase()} DATA PLAN',
+                      '${plan.cycleType.displayName.toUpperCase()} $categoryLabel PLAN',
                       style: theme.textTheme.labelMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                         letterSpacing: 0.8,

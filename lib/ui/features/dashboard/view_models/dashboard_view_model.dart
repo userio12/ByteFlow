@@ -1,36 +1,38 @@
 import 'dart:async';
 import 'package:flutter/foundation.dart';
 import '../../../../data/services/native_network_service.dart';
-import '../../../../domain/models/app_usage_entity.dart';
 import '../../../../domain/models/data_plan_entity.dart';
 import '../../../../domain/models/network_summary_entity.dart';
 import '../../../../domain/models/sim_info_entity.dart';
 import '../../../../domain/models/speed_sample_entity.dart';
-import '../../../../domain/models/time_range.dart';
-import '../../../../domain/repositories/i_network_repository.dart';
+import '../../../../domain/repositories/i_plan_repository.dart';
 import '../../../../domain/use_cases/get_active_sim_info_use_case.dart';
 import '../../../../domain/use_cases/get_data_plan_use_case.dart';
 import '../../../../domain/use_cases/get_today_usage_use_case.dart';
+import '../../plan/view_models/plan_view_model.dart';
 
 /// ViewModel driving real-time throughput pulses and daily summary metrics on the Dashboard.
 class DashboardViewModel extends ChangeNotifier {
   final GetTodayUsageUseCase _getTodayUsageUseCase;
   final GetActiveSimInfoUseCase _getActiveSimInfoUseCase;
   final GetDataPlanUseCase _getDataPlanUseCase;
-  final INetworkRepository _networkRepository;
   final NativeNetworkService _nativeService;
+  final IPlanRepository? _planRepository;
 
   DashboardViewModel({
     required GetTodayUsageUseCase getTodayUsageUseCase,
     required GetActiveSimInfoUseCase getActiveSimInfoUseCase,
     required GetDataPlanUseCase getDataPlanUseCase,
-    required INetworkRepository networkRepository,
     required NativeNetworkService nativeService,
+    IPlanRepository? planRepository,
   })  : _getTodayUsageUseCase = getTodayUsageUseCase,
         _getActiveSimInfoUseCase = getActiveSimInfoUseCase,
         _getDataPlanUseCase = getDataPlanUseCase,
-        _networkRepository = networkRepository,
-        _nativeService = nativeService;
+        _nativeService = nativeService,
+        _planRepository = planRepository;
+
+  PlanCategory _selectedCategory = PlanCategory.cellular;
+  PlanCategory get selectedCategory => _selectedCategory;
 
   NetworkSummaryEntity? _todaySummary;
   NetworkSummaryEntity? get todaySummary => _todaySummary;
@@ -38,11 +40,28 @@ class DashboardViewModel extends ChangeNotifier {
   SimInfoEntity? _activeSim;
   SimInfoEntity? get activeSim => _activeSim;
 
-  DataPlanEntity _dataPlan = const DataPlanEntity();
-  DataPlanEntity get dataPlan => _dataPlan;
+  DataPlanEntity _cellularPlan = const DataPlanEntity();
+  DataPlanEntity _wifiPlan = const DataPlanEntity(
+    quotaBytes: 100 * 1024 * 1024 * 1024,
+    cycleType: DataPlanCycleType.monthly,
+    resetDay: 1,
+  );
 
-  List<AppUsageEntity> _topApps = const [];
-  List<AppUsageEntity> get topApps => _topApps;
+  DataPlanEntity get dataPlan =>
+      _selectedCategory == PlanCategory.cellular ? _cellularPlan : _wifiPlan;
+  DataPlanEntity get activePlan => dataPlan;
+  DataPlanEntity get cellularPlan => _cellularPlan;
+  DataPlanEntity get wifiPlan => _wifiPlan;
+
+  int get activeUsedBytes => _selectedCategory == PlanCategory.cellular
+      ? (_todaySummary?.mobileTotal ?? 0)
+      : (_todaySummary?.wifiTotal ?? 0);
+
+  void selectCategory(PlanCategory category) {
+    if (_selectedCategory == category) return;
+    _selectedCategory = category;
+    notifyListeners();
+  }
 
   SpeedSampleEntity _currentSpeed = SpeedSampleEntity(
     downloadBps: 0,
@@ -105,24 +124,21 @@ class DashboardViewModel extends ChangeNotifier {
         failure: (_) {},
       );
 
-      // 3. Load active data plan quota
+      // 3. Load active data plan quota (cellular)
       final planResult = await _getDataPlanUseCase();
       planResult.when(
-        success: (plan) => _dataPlan = plan,
+        success: (plan) => _cellularPlan = plan,
         failure: (_) {},
       );
 
-      // 4. Load top apps today (top 3)
-      final appsResult = await _networkRepository.getAppsUsage(
-        range: TimeRange.today,
-        includeIcons: true,
-      );
-      appsResult.when(
-        success: (apps) {
-          _topApps = apps.take(3).toList();
-        },
-        failure: (_) {},
-      );
+      // 4. Load Wi-Fi data plan quota
+      if (_planRepository != null) {
+        final wifiResult = await _planRepository.getWifiPlan();
+        wifiResult.when(
+          success: (wifiPlan) => _wifiPlan = wifiPlan,
+          failure: (_) {},
+        );
+      }
     } finally {
       _isLoading = false;
       notifyListeners();

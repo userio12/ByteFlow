@@ -11,7 +11,7 @@ import 'package:byteflow/ui/features/dashboard/views/dashboard_view.dart';
 import 'package:byteflow/ui/features/dashboard/widgets/daily_comparison_tile.dart';
 import 'package:byteflow/ui/features/dashboard/widgets/plan_progress_ring.dart';
 import 'package:byteflow/ui/features/dashboard/widgets/speed_pulse_card.dart';
-import 'package:byteflow/ui/features/dashboard/widgets/top_apps_preview_card.dart';
+import 'package:byteflow/ui/features/plan/view_models/plan_view_model.dart';
 
 import '../../mocks/mock_native_network_service.dart';
 import '../../mocks/mock_repositories.dart';
@@ -49,8 +49,8 @@ void main() {
         getTodayUsageUseCase: GetTodayUsageUseCase(fakeNetworkRepo),
         getActiveSimInfoUseCase: GetActiveSimInfoUseCase(fakeNetworkRepo),
         getDataPlanUseCase: GetDataPlanUseCase(fakePlanRepo),
-        networkRepository: fakeNetworkRepo,
         nativeService: mockNativeService,
+        planRepository: fakePlanRepo,
       );
     });
 
@@ -62,7 +62,6 @@ void main() {
       addTearDown(tester.view.resetDevicePixelRatio);
 
       bool openedSettings = false;
-      bool navigatedToApps = false;
       bool navigatedToPlan = false;
 
       await tester.pumpWidget(
@@ -70,7 +69,6 @@ void main() {
           home: DashboardView(
             viewModel: viewModel,
             onOpenSettings: () => openedSettings = true,
-            onNavigateToApps: () => navigatedToApps = true,
             onNavigateToPlan: () => navigatedToPlan = true,
           ),
         ),
@@ -87,9 +85,11 @@ void main() {
       expect(find.byType(SpeedPulseCard), findsOneWidget);
       expect(find.text('LIVE NETWORK SPEED'), findsOneWidget);
 
+      expect(find.byType(SegmentedButton<PlanCategory>), findsOneWidget);
       expect(find.byType(PlanProgressRing), findsOneWidget);
+      expect(find.textContaining('CELLULAR PLAN'), findsOneWidget);
       expect(find.byType(DailyComparisonTile), findsOneWidget);
-      expect(find.byType(TopAppsPreviewCard), findsOneWidget);
+      expect(find.text('TOP CONSUMERS TODAY'), findsNothing);
 
       // 3. Test settings button tap
       final settingsBtn = find.byIcon(AppIcons.settings);
@@ -102,11 +102,26 @@ void main() {
       await tester.tap(carrierBadge);
       expect(navigatedToPlan, isTrue);
 
-      // 5. Test top apps 'View All' tap triggers apps navigation
-      final viewAllBtn = find.text('View All');
-      expect(viewAllBtn, findsOneWidget);
-      await tester.tap(viewAllBtn);
-      expect(navigatedToApps, isTrue);
+      // 5. Test switching to Wi-Fi category via SegmentedButton
+      final wifiSegment = find.text('Wi-Fi').first;
+      await tester.tap(wifiSegment);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('WI-FI PLAN'), findsOneWidget);
+
+      // 6. Test switching back to Cellular via DailyComparisonTile tap
+      final cellularTile = find.text('Cellular').last;
+      await tester.tap(cellularTile);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('CELLULAR PLAN'), findsOneWidget);
+
+      // 7. Test switching to Wi-Fi via DailyComparisonTile tap
+      final wifiTile = find.text('Wi-Fi').last;
+      await tester.tap(wifiTile);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('WI-FI PLAN'), findsOneWidget);
     });
   });
 }
