@@ -1,9 +1,8 @@
+import 'package:byteflow/core/constants/channel_constants.dart';
 import 'package:byteflow/domain/models/historical_summary_entity.dart';
-import 'package:byteflow/domain/models/hourly_spike_entity.dart';
 import 'package:byteflow/domain/models/time_range.dart';
 import 'package:byteflow/domain/models/usage_time_bucket.dart';
 import 'package:byteflow/domain/use_cases/get_historical_summary_use_case.dart';
-import 'package:byteflow/domain/use_cases/get_hourly_spikes_use_case.dart';
 import 'package:byteflow/ui/core/widgets/time_range_segmented_button.dart';
 import 'package:byteflow/ui/features/history/view_models/history_view_model.dart';
 import 'package:byteflow/ui/features/history/views/history_view.dart';
@@ -51,24 +50,15 @@ void main() {
         peakBucket: buckets[14],
       );
 
-      fakeNetworkRepo.hourlySpikes = [
-        const HourlySpikeEntity(
-          hourOfDay: 14,
-          totalBytes: 60000000,
-          culpritAppName: 'Netflix',
-          culpritPackageName: 'com.netflix.mediaclient',
-          culpritBytes: 55000000,
-        ),
-      ];
-
       viewModel = HistoryViewModel(
-        getHistoricalSummaryUseCase: GetHistoricalSummaryUseCase(fakeNetworkRepo),
-        getHourlySpikesUseCase: GetHourlySpikesUseCase(fakeNetworkRepo),
+        getHistoricalSummaryUseCase:
+            GetHistoricalSummaryUseCase(fakeNetworkRepo),
         planRepository: fakePlanRepo,
       );
     });
 
-    testWidgets('renders all major sections and responds to time range switching',
+    testWidgets(
+        'renders time range, network filter chips, and charts without spike analysis or insights grid',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -87,26 +77,64 @@ void main() {
       // 1. App bar and Title
       expect(find.text('Usage History & Trends'), findsOneWidget);
 
-      // 2. Segmented Button
+      // 2. Segmented Button (TimeRange)
       expect(find.byType(TimeRangeSegmentedButton), findsOneWidget);
       expect(find.text('Today'), findsOneWidget);
       expect(find.text('Weekly'), findsOneWidget);
       expect(find.text('Monthly'), findsOneWidget);
       expect(find.text('Yearly'), findsOneWidget);
 
-      // 3. Dynamic Chart Card (Today)
+      // 3. Network Filter Chips
+      expect(find.text('Network: '), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'All'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'Mobile'), findsOneWidget);
+      expect(find.widgetWithText(ChoiceChip, 'Wi-Fi'), findsOneWidget);
+
+      // 4. Dynamic Chart Card (Today)
       expect(find.text('24-HOUR HOURLY TRAFFIC'), findsOneWidget);
       expect(find.byType(HourlySpikeChart), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(HourlySpikeChart),
+          matching: find.text('Cellular'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(HourlySpikeChart),
+          matching: find.text('Wi-Fi'),
+        ),
+        findsOneWidget,
+      );
 
-      // 4. Spike Culprit Card
-      expect(find.byType(SpikeCulpritCard), findsOneWidget);
+      // 5. Spike Analysis and Insights Grid must NOT be present
+      expect(find.byType(SpikeCulpritCard), findsNothing);
+      expect(find.byType(InsightsGrid), findsNothing);
+      expect(find.text('DAILY AVERAGE'), findsNothing);
+      expect(find.text('CELL / WI-FI RATIO'), findsNothing);
+      expect(find.text('SPIKE ANALYSIS'), findsNothing);
 
-      // 5. Insights Grid
-      expect(find.byType(InsightsGrid), findsOneWidget);
-      expect(find.text('DAILY AVERAGE'), findsOneWidget);
-      expect(find.text('CELL / WI-FI RATIO'), findsOneWidget);
+      // 6. Test Network Filter Switching
+      final mobileChip = find.widgetWithText(ChoiceChip, 'Mobile');
+      await tester.tap(mobileChip);
+      await tester.pumpAndSettle();
+      expect(viewModel.selectedNetworkType,
+          equals(ChannelConstants.networkTypeMobile));
 
-      // 6. Switch to Weekly
+      final wifiChip = find.widgetWithText(ChoiceChip, 'Wi-Fi');
+      await tester.tap(wifiChip);
+      await tester.pumpAndSettle();
+      expect(viewModel.selectedNetworkType,
+          equals(ChannelConstants.networkTypeWifi));
+
+      final allChip = find.widgetWithText(ChoiceChip, 'All');
+      await tester.tap(allChip);
+      await tester.pumpAndSettle();
+      expect(viewModel.selectedNetworkType,
+          equals(ChannelConstants.networkTypeAll));
+
+      // 7. Switch to Weekly
       final weekBounds = TimeRange.week.calculateBounds();
       final weekBuckets = List.generate(7, (day) {
         return UsageTimeBucket(
@@ -135,7 +163,8 @@ void main() {
 
       expect(find.text('7-DAY COMPARATIVE CONSUMPTION'), findsOneWidget);
       expect(find.byType(WeeklyComparisonChart), findsOneWidget);
-      expect(find.byType(SpikeCulpritCard), findsNothing); // Culprit card only on today
+      expect(find.byType(SpikeCulpritCard), findsNothing);
+      expect(find.byType(InsightsGrid), findsNothing);
     });
   });
 }

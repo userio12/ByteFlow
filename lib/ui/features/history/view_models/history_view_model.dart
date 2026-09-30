@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import '../../../../core/constants/channel_constants.dart';
 import '../../../../domain/models/historical_summary_entity.dart';
 import '../../../../domain/models/hourly_spike_entity.dart';
 import '../../../../domain/models/time_range.dart';
@@ -7,15 +8,15 @@ import '../../../../domain/repositories/i_plan_repository.dart';
 import '../../../../domain/use_cases/get_historical_summary_use_case.dart';
 import '../../../../domain/use_cases/get_hourly_spikes_use_case.dart';
 
-/// ViewModel orchestrating multi-timeframe historical rollups and spike culprit diagnosis.
+/// ViewModel orchestrating multi-timeframe historical rollups and network slice filtering.
 class HistoryViewModel extends ChangeNotifier {
   final GetHistoricalSummaryUseCase _getHistoricalSummaryUseCase;
-  final GetHourlySpikesUseCase _getHourlySpikesUseCase;
+  final GetHourlySpikesUseCase? _getHourlySpikesUseCase;
   final IPlanRepository _planRepository;
 
   HistoryViewModel({
     required GetHistoricalSummaryUseCase getHistoricalSummaryUseCase,
-    required GetHourlySpikesUseCase getHourlySpikesUseCase,
+    GetHourlySpikesUseCase? getHourlySpikesUseCase,
     required IPlanRepository planRepository,
   })  : _getHistoricalSummaryUseCase = getHistoricalSummaryUseCase,
         _getHourlySpikesUseCase = getHourlySpikesUseCase,
@@ -23,6 +24,16 @@ class HistoryViewModel extends ChangeNotifier {
 
   TimeRange _selectedRange = TimeRange.today;
   TimeRange get selectedRange => _selectedRange;
+
+  int _selectedNetworkType = ChannelConstants.networkTypeAll;
+  int get selectedNetworkType => _selectedNetworkType;
+
+  void setNetworkType(int networkType) {
+    if (_selectedNetworkType != networkType) {
+      _selectedNetworkType = networkType;
+      notifyListeners();
+    }
+  }
 
   HistoricalSummaryEntity? _summary;
   HistoricalSummaryEntity? get summary => _summary;
@@ -97,8 +108,8 @@ class HistoryViewModel extends ChangeNotifier {
         failure: (failure) => _errorMessage = failure.message,
       );
 
-      // 3. If Today range, also fetch granular hourly spikes
-      if (_selectedRange == TimeRange.today) {
+      // 3. If Today range and spikes use case provided, also fetch granular hourly spikes
+      if (_selectedRange == TimeRange.today && _getHourlySpikesUseCase != null) {
         final spikesResult = await _getHourlySpikesUseCase();
         spikesResult.when(
           success: (spikes) {

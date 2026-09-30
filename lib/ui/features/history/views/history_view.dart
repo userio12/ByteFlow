@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
+import '../../../../core/constants/channel_constants.dart';
+import '../../../../core/theme/app_icons.dart';
 import '../../../../domain/models/time_range.dart';
 import '../../../core/widgets/time_range_segmented_button.dart';
 import '../view_models/history_view_model.dart';
 import '../widgets/hourly_spike_chart.dart';
-import '../widgets/insights_grid.dart';
 import '../widgets/monthly_trajectory_chart.dart';
-import '../widgets/spike_culprit_card.dart';
 import '../widgets/weekly_comparison_chart.dart';
 import '../widgets/yearly_distribution_chart.dart';
 
-/// The History & Trends analytics view rendering multi-timeframe charts and spike analysis.
+/// The History & Trends analytics view rendering multi-timeframe charts and network slice filtering.
 class HistoryView extends StatefulWidget {
   final HistoryViewModel viewModel;
 
@@ -63,6 +63,52 @@ class _HistoryViewState extends State<HistoryView> {
                   onRangeChanged: vm.setTimeRange,
                 ),
               ),
+
+              // Network Filter Chips
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      Text(
+                        'Network: ',
+                        style: theme.textTheme.labelMedium?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      _buildNetworkChip(
+                        label: 'All',
+                        icon: null,
+                        type: ChannelConstants.networkTypeAll,
+                        colorScheme: colorScheme,
+                        selectedType: vm.selectedNetworkType,
+                        onChanged: vm.setNetworkType,
+                      ),
+                      const SizedBox(width: 6),
+                      _buildNetworkChip(
+                        label: 'Mobile',
+                        icon: AppIcons.cellular,
+                        type: ChannelConstants.networkTypeMobile,
+                        colorScheme: colorScheme,
+                        selectedType: vm.selectedNetworkType,
+                        onChanged: vm.setNetworkType,
+                      ),
+                      const SizedBox(width: 6),
+                      _buildNetworkChip(
+                        label: 'Wi-Fi',
+                        icon: AppIcons.wifi,
+                        type: ChannelConstants.networkTypeWifi,
+                        colorScheme: colorScheme,
+                        selectedType: vm.selectedNetworkType,
+                        onChanged: vm.setNetworkType,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               const Divider(height: 1),
 
               // Content Area
@@ -86,14 +132,15 @@ class _HistoryViewState extends State<HistoryView> {
                                 vertical: 12.0,
                               ),
                               children: [
-                                // 1. Dynamic Chart Card
+                                // Dynamic Chart Card
                                 Card(
                                   elevation: 0,
                                   color: colorScheme.surfaceContainer,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(20),
                                     side: BorderSide(
-                                      color: colorScheme.outlineVariant.withValues(alpha: 0.5),
+                                      color: colorScheme.outlineVariant
+                                          .withValues(alpha: 0.5),
                                     ),
                                   ),
                                   child: Padding(
@@ -104,7 +151,8 @@ class _HistoryViewState extends State<HistoryView> {
                                       children: [
                                         Text(
                                           _getChartTitle(vm.selectedRange),
-                                          style: theme.textTheme.labelMedium?.copyWith(
+                                          style: theme.textTheme.labelMedium
+                                              ?.copyWith(
                                             fontWeight: FontWeight.bold,
                                             letterSpacing: 0.8,
                                             color: colorScheme.onSurfaceVariant,
@@ -117,16 +165,6 @@ class _HistoryViewState extends State<HistoryView> {
                                   ),
                                 ),
                                 const SizedBox(height: 12),
-
-                                // 2. Spike Culprit Card (For Today range)
-                                if (vm.selectedRange == TimeRange.today) ...[
-                                  SpikeCulpritCard(spike: vm.selectedSpike),
-                                  const SizedBox(height: 12),
-                                ],
-
-                                // 3. Insights Grid
-                                InsightsGrid(summary: summary),
-                                const SizedBox(height: 24),
                               ],
                             ),
                           ),
@@ -135,6 +173,37 @@ class _HistoryViewState extends State<HistoryView> {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildNetworkChip({
+    required String label,
+    required IconData? icon,
+    required int type,
+    required ColorScheme colorScheme,
+    required int selectedType,
+    required ValueChanged<int> onChanged,
+  }) {
+    final isSelected = selectedType == type;
+
+    return ChoiceChip(
+      avatar: icon != null
+          ? Icon(
+              icon,
+              size: 15,
+              color: isSelected
+                  ? colorScheme.onPrimaryContainer
+                  : colorScheme.onSurfaceVariant,
+            )
+          : null,
+      label: Text(label),
+      selected: isSelected,
+      onSelected: (_) => onChanged(type),
+      visualDensity: VisualDensity.compact,
+      labelStyle: TextStyle(
+        fontSize: 12,
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+      ),
     );
   }
 
@@ -152,15 +221,21 @@ class _HistoryViewState extends State<HistoryView> {
     return switch (vm.selectedRange) {
       TimeRange.today => HourlySpikeChart(
           buckets: summary.buckets,
-          selectedHour: vm.selectedHourIndex,
-          onHourSelected: vm.selectHour,
+          networkType: vm.selectedNetworkType,
         ),
-      TimeRange.week => WeeklyComparisonChart(buckets: summary.buckets),
+      TimeRange.week => WeeklyComparisonChart(
+          buckets: summary.buckets,
+          networkType: vm.selectedNetworkType,
+        ),
       TimeRange.month => MonthlyTrajectoryChart(
           buckets: summary.buckets,
           quotaBytes: vm.quotaBytes,
+          networkType: vm.selectedNetworkType,
         ),
-      TimeRange.year => YearlyDistributionChart(buckets: summary.buckets),
+      TimeRange.year => YearlyDistributionChart(
+          buckets: summary.buckets,
+          networkType: vm.selectedNetworkType,
+        ),
     };
   }
 }

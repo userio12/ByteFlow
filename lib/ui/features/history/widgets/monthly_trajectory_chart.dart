@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/constants/channel_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/byte_formatter.dart';
 import '../../../../domain/models/usage_time_bucket.dart';
@@ -8,11 +9,13 @@ import '../../../../domain/models/usage_time_bucket.dart';
 class MonthlyTrajectoryChart extends StatelessWidget {
   final List<UsageTimeBucket> buckets;
   final int quotaBytes;
+  final int networkType;
 
   const MonthlyTrajectoryChart({
     super.key,
     required this.buckets,
     required this.quotaBytes,
+    this.networkType = ChannelConstants.networkTypeAll,
   });
 
   @override
@@ -27,11 +30,20 @@ class MonthlyTrajectoryChart extends StatelessWidget {
       );
     }
 
+    final isWifiOnly = networkType == ChannelConstants.networkTypeWifi;
+    final isMobileOnly = networkType == ChannelConstants.networkTypeMobile;
+
     // Compute cumulative actual spots
     final actualSpots = <FlSpot>[];
     int cumulative = 0;
     for (int i = 0; i < buckets.length; i++) {
-      cumulative += buckets[i].totalMobileBytes;
+      if (isWifiOnly) {
+        cumulative += buckets[i].totalWifiBytes;
+      } else if (isMobileOnly) {
+        cumulative += buckets[i].totalMobileBytes;
+      } else {
+        cumulative += buckets[i].totalBytes;
+      }
       actualSpots.add(FlSpot(i.toDouble(), cumulative.toDouble()));
     }
 
@@ -48,13 +60,20 @@ class MonthlyTrajectoryChart extends StatelessWidget {
       cumulative.toDouble() * 1.15,
     ].reduce((a, b) => a > b ? a : b);
 
+    final lineColor = isWifiOnly ? AppColors.wifi : AppColors.cellular;
+    final legendLabel = isWifiOnly
+        ? 'Wi-Fi Used'
+        : isMobileOnly
+            ? 'Cellular Used'
+            : 'Actual Used';
+
     return Column(
       children: [
         // Legend
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _buildLegend(AppColors.cellular, 'Actual Used', isDashed: false),
+            _buildLegend(lineColor, legendLabel, isDashed: false),
             const SizedBox(width: 16),
             _buildLegend(
               colorScheme.outlineVariant,
@@ -80,13 +99,13 @@ class MonthlyTrajectoryChart extends StatelessWidget {
                       final isActual = spot.barIndex == 0;
                       final label = isActual ? 'Actual' : 'Ideal';
                       final dayIndex = spot.x.toInt();
-                      final dayLabel = dayIndex < buckets.length ? buckets[dayIndex].label : 'Day ${dayIndex + 1}';
+                      final dayLabel = dayIndex < buckets.length
+                          ? buckets[dayIndex].label
+                          : 'Day ${dayIndex + 1}';
                       return LineTooltipItem(
                         '$dayLabel ($label)\n${ByteFormatter.format(spot.y.round())}',
                         TextStyle(
-                          color: isActual
-                              ? AppColors.cellular
-                              : colorScheme.onSurface,
+                          color: isActual ? lineColor : colorScheme.onSurface,
                           fontWeight: FontWeight.bold,
                           fontSize: 12,
                         ),
@@ -97,14 +116,18 @@ class MonthlyTrajectoryChart extends StatelessWidget {
               ),
               titlesData: FlTitlesData(
                 show: true,
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 44,
                     getTitlesWidget: (value, meta) {
-                      if (value == 0 || value == meta.max) return const SizedBox.shrink();
+                      if (value == 0 || value == meta.max) {
+                        return const SizedBox.shrink();
+                      }
                       return Text(
                         ByteFormatter.format(value.round(), decimals: 0),
                         style: theme.textTheme.labelSmall?.copyWith(
@@ -153,13 +176,13 @@ class MonthlyTrajectoryChart extends StatelessWidget {
                 LineChartBarData(
                   spots: actualSpots,
                   isCurved: true,
-                  color: AppColors.cellular,
+                  color: lineColor,
                   barWidth: 3.5,
                   isStrokeCapRound: true,
                   dotData: const FlDotData(show: false),
                   belowBarData: BarAreaData(
                     show: true,
-                    color: AppColors.cellular.withValues(alpha: 0.12),
+                    color: lineColor.withValues(alpha: 0.12),
                   ),
                 ),
                 // 2. Ideal linear pace line

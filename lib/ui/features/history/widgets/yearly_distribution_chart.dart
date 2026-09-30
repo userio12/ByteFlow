@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/constants/channel_constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/byte_formatter.dart';
 import '../../../../domain/models/usage_time_bucket.dart';
@@ -7,10 +8,12 @@ import '../../../../domain/models/usage_time_bucket.dart';
 /// 12-month annual distribution BarChart comparing Cellular vs Wi-Fi offload ratio.
 class YearlyDistributionChart extends StatelessWidget {
   final List<UsageTimeBucket> buckets;
+  final int networkType;
 
   const YearlyDistributionChart({
     super.key,
     required this.buckets,
+    this.networkType = ChannelConstants.networkTypeAll,
   });
 
   @override
@@ -25,9 +28,25 @@ class YearlyDistributionChart extends StatelessWidget {
       );
     }
 
+    final showCellular = networkType == ChannelConstants.networkTypeAll ||
+        networkType == ChannelConstants.networkTypeMobile;
+    final showWifi = networkType == ChannelConstants.networkTypeAll ||
+        networkType == ChannelConstants.networkTypeWifi;
+    final showBoth = showCellular && showWifi;
+
     final maxBytes = buckets.fold<int>(
       1,
-      (max, b) => b.totalBytes > max ? b.totalBytes : max,
+      (max, b) {
+        int candidate = 0;
+        if (showBoth) {
+          candidate = b.totalBytes;
+        } else if (showCellular) {
+          candidate = b.totalMobileBytes;
+        } else {
+          candidate = b.totalWifiBytes;
+        }
+        return candidate > max ? candidate : max;
+      },
     );
 
     return Column(
@@ -36,9 +55,11 @@ class YearlyDistributionChart extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _buildLegend(AppColors.cellular, 'Cellular'),
-            const SizedBox(width: 16),
-            _buildLegend(AppColors.wifi, 'Wi-Fi Offload'),
+            if (showCellular)
+              _buildLegend(AppColors.cellular, 'Cellular'),
+            if (showBoth) const SizedBox(width: 16),
+            if (showWifi)
+              _buildLegend(AppColors.wifi, showBoth ? 'Wi-Fi Offload' : 'Wi-Fi'),
           ],
         ),
         const SizedBox(height: 12),
@@ -55,34 +76,61 @@ class YearlyDistributionChart extends StatelessWidget {
                   getTooltipColor: (_) => colorScheme.surfaceContainerHighest,
                   getTooltipItem: (group, groupIndex, rod, rodIndex) {
                     final bucket = buckets[groupIndex];
-                    final offload = bucket.totalBytes > 0
-                        ? (bucket.totalWifiBytes / bucket.totalBytes * 100).toStringAsFixed(0)
-                        : '0';
+                    if (showBoth) {
+                      final offload = bucket.totalBytes > 0
+                          ? (bucket.totalWifiBytes / bucket.totalBytes * 100)
+                              .toStringAsFixed(0)
+                          : '0';
 
-                    return BarTooltipItem(
-                      '${bucket.label}\n'
-                      'Total: ${ByteFormatter.format(bucket.totalBytes)}\n'
-                      'Cell: ${ByteFormatter.format(bucket.totalMobileBytes)}\n'
-                      'Wi-Fi: ${ByteFormatter.format(bucket.totalWifiBytes)} ($offload% offload)',
-                      TextStyle(
-                        color: colorScheme.onSurface,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 11,
-                      ),
-                    );
+                      return BarTooltipItem(
+                        '${bucket.label}\n'
+                        'Total: ${ByteFormatter.format(bucket.totalBytes)}\n'
+                        'Cell: ${ByteFormatter.format(bucket.totalMobileBytes)}\n'
+                        'Wi-Fi: ${ByteFormatter.format(bucket.totalWifiBytes)} ($offload% offload)',
+                        TextStyle(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      );
+                    } else if (showCellular) {
+                      return BarTooltipItem(
+                        '${bucket.label}\n'
+                        'Cell: ${ByteFormatter.format(bucket.totalMobileBytes)}',
+                        TextStyle(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      );
+                    } else {
+                      return BarTooltipItem(
+                        '${bucket.label}\n'
+                        'Wi-Fi: ${ByteFormatter.format(bucket.totalWifiBytes)}',
+                        TextStyle(
+                          color: colorScheme.onSurface,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 11,
+                        ),
+                      );
+                    }
                   },
                 ),
               ),
               titlesData: FlTitlesData(
                 show: true,
-                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles:
+                    const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                 leftTitles: AxisTitles(
                   sideTitles: SideTitles(
                     showTitles: true,
                     reservedSize: 42,
                     getTitlesWidget: (value, meta) {
-                      if (value == 0 || value == meta.max) return const SizedBox.shrink();
+                      if (value == 0 || value == meta.max) {
+                        return const SizedBox.shrink();
+                      }
                       return Text(
                         ByteFormatter.format(value.round(), decimals: 0),
                         style: theme.textTheme.labelSmall?.copyWith(
@@ -127,29 +175,58 @@ class YearlyDistributionChart extends StatelessWidget {
               borderData: FlBorderData(show: false),
               barGroups: List.generate(buckets.length, (index) {
                 final bucket = buckets[index];
-                return BarChartGroupData(
-                  x: index,
-                  barRods: [
-                    BarChartRodData(
-                      toY: bucket.totalBytes.toDouble(),
-                      rodStackItems: [
-                        BarChartRodStackItem(
-                          0,
-                          bucket.totalMobileBytes.toDouble(),
-                          AppColors.cellular,
-                        ),
-                        BarChartRodStackItem(
-                          bucket.totalMobileBytes.toDouble(),
-                          bucket.totalBytes.toDouble(),
-                          AppColors.wifi,
-                        ),
-                      ],
-                      width: 14,
-                      borderRadius:
-                          const BorderRadius.vertical(top: Radius.circular(4)),
-                    ),
-                  ],
-                );
+
+                if (showBoth) {
+                  return BarChartGroupData(
+                    x: index,
+                    barRods: [
+                      BarChartRodData(
+                        toY: bucket.totalBytes.toDouble(),
+                        rodStackItems: [
+                          BarChartRodStackItem(
+                            0,
+                            bucket.totalMobileBytes.toDouble(),
+                            AppColors.cellular,
+                          ),
+                          BarChartRodStackItem(
+                            bucket.totalMobileBytes.toDouble(),
+                            bucket.totalBytes.toDouble(),
+                            AppColors.wifi,
+                          ),
+                        ],
+                        width: 14,
+                        borderRadius:
+                            const BorderRadius.vertical(top: Radius.circular(4)),
+                      ),
+                    ],
+                  );
+                } else if (showCellular) {
+                  return BarChartGroupData(
+                    x: index,
+                    barRods: [
+                      BarChartRodData(
+                        toY: bucket.totalMobileBytes.toDouble(),
+                        color: AppColors.cellular,
+                        width: 14,
+                        borderRadius:
+                            const BorderRadius.vertical(top: Radius.circular(4)),
+                      ),
+                    ],
+                  );
+                } else {
+                  return BarChartGroupData(
+                    x: index,
+                    barRods: [
+                      BarChartRodData(
+                        toY: bucket.totalWifiBytes.toDouble(),
+                        color: AppColors.wifi,
+                        width: 14,
+                        borderRadius:
+                            const BorderRadius.vertical(top: Radius.circular(4)),
+                      ),
+                    ],
+                  );
+                }
               }),
             ),
           ),
