@@ -6,8 +6,8 @@ enum AppTypeFilter {
 
   /// User-facing display title for chips and menus.
   String get displayName => switch (this) {
-        AppTypeFilter.userInstalled => 'Installed',
-        AppTypeFilter.system => 'System',
-        AppTypeFilter.all => 'All',
+        AppTypeFilter.userInstalled => 'User Apps',
+        AppTypeFilter.system => 'System Services',
+        AppTypeFilter.all => 'All Apps',
       };
 }

@@ -4,6 +4,7 @@ import '../../../../core/utils/byte_formatter.dart';
 import '../../../core/widgets/empty_state_card.dart';
 import '../view_models/app_usage_view_model.dart';
 import '../widgets/app_details_bottom_sheet.dart';
+import '../widgets/app_filter_modal_sheet.dart';
 import '../widgets/app_search_filter_bar.dart';
 import '../widgets/app_usage_tile.dart';
 
@@ -27,6 +28,21 @@ class _AppUsageViewState extends State<AppUsageView> {
     widget.viewModel.init();
   }
 
+  void _openFilterSheet(BuildContext context, AppUsageViewModel vm) {
+    AppFilterModalSheet.show(
+      context,
+      selectedRange: vm.selectedRange,
+      onRangeChanged: vm.setTimeRange,
+      selectedNetworkType: vm.selectedNetworkType,
+      onNetworkTypeChanged: vm.setNetworkType,
+      selectedAppType: vm.selectedAppType,
+      onAppTypeChanged: vm.setAppType,
+      selectedSortOrder: vm.sortOrder,
+      onSortOrderChanged: vm.setSortOrder,
+      onReset: vm.resetFilters,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -48,10 +64,18 @@ class _AppUsageViewState extends State<AppUsageView> {
                 letterSpacing: -0.5,
               ),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(AppIcons.refresh),
+                tooltip: 'Refresh',
+                onPressed: vm.loadApps,
+              ),
+              const SizedBox(width: 4),
+            ],
           ),
           body: Column(
             children: [
-              // Search & Filter controls
+              // Compact Search & Filter controls
               AppSearchFilterBar(
                 searchQuery: vm.searchQuery,
                 onSearchChanged: vm.setSearchQuery,
@@ -61,24 +85,43 @@ class _AppUsageViewState extends State<AppUsageView> {
                 onRangeChanged: vm.setTimeRange,
                 selectedAppType: vm.selectedAppType,
                 onAppTypeChanged: vm.setAppType,
+                selectedSortOrder: vm.sortOrder,
+                onSortOrderChanged: vm.setSortOrder,
+                onOpenFilterSheet: () => _openFilterSheet(context, vm),
+                isFiltered: vm.isFiltered,
               ),
 
-              // Summary Banner
+              // Summary & Reset Banner
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
-                  vertical: 6.0,
+                  vertical: 4.0,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Total: ${ByteFormatter.format(vm.totalFilteredBytes)} across ${apps.length} apps',
+                      'Showing ${apps.length} apps • Total: ${ByteFormatter.format(vm.totalFilteredBytes)}',
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: colorScheme.onSurfaceVariant,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    if (vm.isFiltered)
+                      InkWell(
+                        onTap: vm.resetFilters,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          child: Text(
+                            'Reset Filters',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -94,12 +137,14 @@ class _AppUsageViewState extends State<AppUsageView> {
                             title: 'No Applications Found',
                             message: vm.searchQuery.isNotEmpty
                                 ? 'No applications match "${vm.searchQuery}".'
-                                : 'No usage statistics recorded for this time range.',
-                            actionLabel: vm.searchQuery.isNotEmpty
-                                ? 'Clear Search'
+                                : vm.isFiltered
+                                    ? 'No usage recorded matching current filter settings.'
+                                    : 'No network usage recorded for this time range.',
+                            actionLabel: vm.isFiltered
+                                ? 'Reset Filters'
                                 : 'Refresh',
-                            onActionPressed: vm.searchQuery.isNotEmpty
-                                ? () => vm.setSearchQuery('')
+                            onActionPressed: vm.isFiltered
+                                ? vm.resetFilters
                                 : vm.loadApps,
                           )
                         : RefreshIndicator(

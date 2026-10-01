@@ -358,9 +358,16 @@ object NetworkStatsHelper {
             return true
         }
         return try {
-            val appInfo = pm.getApplicationInfo(packageName, 0)
-            (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0 ||
-            (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            // User-facing apps that can be launched from app drawer (e.g. YouTube, Chrome, Maps)
+            // should not be hidden as system daemons even if pre-installed in /system.
+            val hasLaunchIntent = pm.getLaunchIntentForPackage(packageName) != null
+            if (hasLaunchIntent) {
+                false
+            } else {
+                val appInfo = pm.getApplicationInfo(packageName, 0)
+                (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0 ||
+                (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+            }
         } catch (_: Exception) {
             uid < Process.FIRST_APPLICATION_UID
         }

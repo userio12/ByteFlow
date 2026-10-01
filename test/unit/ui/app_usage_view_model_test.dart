@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:byteflow/core/constants/channel_constants.dart';
+import 'package:byteflow/domain/models/app_sort_order.dart';
 import 'package:byteflow/domain/models/app_type_filter.dart';
 import 'package:byteflow/domain/models/app_usage_entity.dart';
 import 'package:byteflow/domain/models/time_range.dart';
@@ -20,6 +21,10 @@ void main() {
         appName: 'WhatsApp',
         rxBytes: 50000000,
         txBytes: 10000000,
+        foregroundRx: 10000000,
+        foregroundTx: 5000000,
+        backgroundRx: 40000000,
+        backgroundTx: 5000000,
         isSystemApp: false,
       ),
       const AppUsageEntity(
@@ -28,6 +33,10 @@ void main() {
         appName: 'Spotify',
         rxBytes: 30000000,
         txBytes: 5000000,
+        foregroundRx: 28000000,
+        foregroundTx: 4000000,
+        backgroundRx: 2000000,
+        backgroundTx: 1000000,
         isSystemApp: false,
       ),
       const AppUsageEntity(
@@ -36,6 +45,10 @@ void main() {
         appName: 'Android System',
         rxBytes: 15000000,
         txBytes: 2000000,
+        foregroundRx: 0,
+        foregroundTx: 0,
+        backgroundRx: 15000000,
+        backgroundTx: 2000000,
         isSystemApp: true,
       ),
     ];
@@ -52,15 +65,18 @@ void main() {
       expect(viewModel.selectedRange, equals(TimeRange.today));
       expect(viewModel.selectedNetworkType, equals(ChannelConstants.networkTypeAll));
       expect(viewModel.selectedAppType, equals(AppTypeFilter.userInstalled));
+      expect(viewModel.sortOrder, equals(AppSortOrder.totalUsageDesc));
       expect(viewModel.searchQuery, isEmpty);
       expect(viewModel.filteredApps, isEmpty);
       expect(viewModel.isLoading, isFalse);
+      expect(viewModel.isFiltered, isFalse);
     });
 
     test('loadApps filters to user installed apps by default', () async {
       await viewModel.loadApps();
 
       expect(viewModel.filteredApps.length, equals(2));
+      expect(viewModel.totalAppsCount, equals(3));
       expect(viewModel.filteredApps.any((app) => app.packageName == 'com.whatsapp'), isTrue);
       expect(viewModel.filteredApps.any((app) => app.packageName == 'com.spotify.music'), isTrue);
       expect(viewModel.filteredApps.any((app) => app.isSystemApp), isFalse);
@@ -77,6 +93,7 @@ void main() {
       expect(viewModel.filteredApps.first.packageName, equals('android.uid.system'));
       expect(viewModel.filteredApps.first.isSystemApp, isTrue);
       expect(viewModel.totalFilteredBytes, equals(17000000));
+      expect(viewModel.isFiltered, isTrue);
     });
 
     test('setAppType to all shows both user and system apps', () async {
@@ -115,6 +132,49 @@ void main() {
       viewModel.setAppType(AppTypeFilter.system);
       expect(viewModel.filteredApps.length, equals(1));
       expect(viewModel.filteredApps.first.appName, equals('Android System'));
+    });
+
+    test('sorting dimensions re-order the filtered apps list', () async {
+      await viewModel.loadApps();
+
+      // Total usage descending (default): WhatsApp (60MB) > Spotify (35MB)
+      viewModel.setSortOrder(AppSortOrder.totalUsageDesc);
+      expect(viewModel.filteredApps.first.appName, equals('WhatsApp'));
+      expect(viewModel.filteredApps.last.appName, equals('Spotify'));
+
+      // Background usage descending: WhatsApp (45MB) > Spotify (3MB)
+      viewModel.setSortOrder(AppSortOrder.backgroundUsageDesc);
+      expect(viewModel.filteredApps.first.appName, equals('WhatsApp'));
+      expect(viewModel.filteredApps.last.appName, equals('Spotify'));
+
+      // Foreground usage descending: Spotify (32MB) > WhatsApp (15MB)
+      viewModel.setSortOrder(AppSortOrder.foregroundUsageDesc);
+      expect(viewModel.filteredApps.first.appName, equals('Spotify'));
+      expect(viewModel.filteredApps.last.appName, equals('WhatsApp'));
+
+      // Name ascending: Spotify < WhatsApp
+      viewModel.setSortOrder(AppSortOrder.nameAsc);
+      expect(viewModel.filteredApps.first.appName, equals('Spotify'));
+      expect(viewModel.filteredApps.last.appName, equals('WhatsApp'));
+    });
+
+    test('resetFilters restores default filter and sort state', () async {
+      await viewModel.loadApps();
+
+      viewModel.setSearchQuery('WhatsApp');
+      viewModel.setAppType(AppTypeFilter.all);
+      viewModel.setSortOrder(AppSortOrder.nameAsc);
+      expect(viewModel.isFiltered, isTrue);
+
+      await viewModel.resetFilters();
+
+      expect(viewModel.searchQuery, isEmpty);
+      expect(viewModel.selectedAppType, equals(AppTypeFilter.userInstalled));
+      expect(viewModel.sortOrder, equals(AppSortOrder.totalUsageDesc));
+      expect(viewModel.selectedRange, equals(TimeRange.today));
+      expect(viewModel.selectedNetworkType, equals(ChannelConstants.networkTypeAll));
+      expect(viewModel.isFiltered, isFalse);
+      expect(viewModel.filteredApps.length, equals(2));
     });
 
     test('setTimeRange triggers reload with updated range', () async {

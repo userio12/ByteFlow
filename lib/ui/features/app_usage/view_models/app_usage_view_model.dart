@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import '../../../../core/constants/channel_constants.dart';
+import '../../../../domain/models/app_sort_order.dart';
 import '../../../../domain/models/app_type_filter.dart';
 import '../../../../domain/models/app_usage_entity.dart';
 import '../../../../domain/models/time_range.dart';
@@ -22,15 +23,26 @@ class AppUsageViewModel extends ChangeNotifier {
   AppTypeFilter _selectedAppType = AppTypeFilter.userInstalled;
   AppTypeFilter get selectedAppType => _selectedAppType;
 
+  AppSortOrder _sortOrder = AppSortOrder.totalUsageDesc;
+  AppSortOrder get sortOrder => _sortOrder;
+
   String _searchQuery = '';
   String get searchQuery => _searchQuery;
 
   List<AppUsageEntity> _allApps = const [];
   List<AppUsageEntity> _filteredApps = const [];
   List<AppUsageEntity> get filteredApps => _filteredApps;
+  int get totalAppsCount => _allApps.length;
 
   int get totalFilteredBytes =>
       _filteredApps.fold(0, (sum, app) => sum + app.totalBytes);
+
+  bool get isFiltered =>
+      _selectedRange != TimeRange.today ||
+      _selectedNetworkType != ChannelConstants.networkTypeAll ||
+      _selectedAppType != AppTypeFilter.userInstalled ||
+      _sortOrder != AppSortOrder.totalUsageDesc ||
+      _searchQuery.isNotEmpty;
 
   bool _isLoading = false;
   bool get isLoading => _isLoading;
@@ -99,6 +111,30 @@ class AppUsageViewModel extends ChangeNotifier {
     }
   }
 
+  void setSortOrder(AppSortOrder order) {
+    if (_sortOrder != order) {
+      _sortOrder = order;
+      _applyFilter();
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetFilters() async {
+    _searchQuery = '';
+    _selectedAppType = AppTypeFilter.userInstalled;
+    _sortOrder = AppSortOrder.totalUsageDesc;
+    final needReload = _selectedRange != TimeRange.today ||
+        _selectedNetworkType != ChannelConstants.networkTypeAll;
+    _selectedRange = TimeRange.today;
+    _selectedNetworkType = ChannelConstants.networkTypeAll;
+    if (needReload) {
+      await loadApps();
+    } else {
+      _applyFilter();
+      notifyListeners();
+    }
+  }
+
   void _applyFilter() {
     Iterable<AppUsageEntity> filtered = _allApps;
 
@@ -123,6 +159,24 @@ class AppUsageViewModel extends ChangeNotifier {
       });
     }
 
-    _filteredApps = filtered.toList();
+    final list = filtered.toList();
+
+    // 3. Sorting Dimension
+    switch (_sortOrder) {
+      case AppSortOrder.totalUsageDesc:
+        list.sort((a, b) => b.totalBytes.compareTo(a.totalBytes));
+        break;
+      case AppSortOrder.backgroundUsageDesc:
+        list.sort((a, b) => b.backgroundBytes.compareTo(a.backgroundBytes));
+        break;
+      case AppSortOrder.foregroundUsageDesc:
+        list.sort((a, b) => b.foregroundBytes.compareTo(a.foregroundBytes));
+        break;
+      case AppSortOrder.nameAsc:
+        list.sort((a, b) => a.appName.toLowerCase().compareTo(b.appName.toLowerCase()));
+        break;
+    }
+
+    _filteredApps = list;
   }
 }
