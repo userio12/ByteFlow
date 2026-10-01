@@ -9,11 +9,13 @@ import '../../../../domain/models/usage_time_bucket.dart';
 class WeeklyComparisonChart extends StatelessWidget {
   final List<UsageTimeBucket> buckets;
   final int networkType;
+  final double chartHeight;
 
   const WeeklyComparisonChart({
     super.key,
     required this.buckets,
     this.networkType = ChannelConstants.networkTypeAll,
+    this.chartHeight = 340.0,
   });
 
   @override
@@ -23,7 +25,7 @@ class WeeklyComparisonChart extends StatelessWidget {
 
     if (buckets.isEmpty) {
       return const SizedBox(
-        height: 200,
+        height: 240,
         child: Center(child: Text('No weekly activity recorded.')),
       );
     }
@@ -67,7 +69,7 @@ class WeeklyComparisonChart extends StatelessWidget {
 
         // Chart
         SizedBox(
-          height: 220,
+          height: chartHeight,
           child: BarChart(
             BarChartData(
               alignment: BarChartAlignment.spaceAround,

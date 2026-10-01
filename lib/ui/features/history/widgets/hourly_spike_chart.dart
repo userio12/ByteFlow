@@ -11,6 +11,7 @@ class HourlySpikeChart extends StatelessWidget {
   final int? selectedHour;
   final ValueChanged<int>? onHourSelected;
   final int networkType;
+  final double chartHeight;
 
   const HourlySpikeChart({
     super.key,
@@ -18,6 +19,7 @@ class HourlySpikeChart extends StatelessWidget {
     this.selectedHour,
     this.onHourSelected,
     this.networkType = ChannelConstants.networkTypeAll,
+    this.chartHeight = 340.0,
   });
 
   @override
@@ -27,7 +29,7 @@ class HourlySpikeChart extends StatelessWidget {
 
     if (buckets.isEmpty) {
       return const SizedBox(
-        height: 200,
+        height: 240,
         child: Center(child: Text('No hourly activity recorded today.')),
       );
     }
@@ -71,7 +73,7 @@ class HourlySpikeChart extends StatelessWidget {
 
         // Chart
         SizedBox(
-          height: 220,
+          height: chartHeight,
           child: BarChart(
             BarChartData(
               alignment: BarChartAlignment.spaceAround,

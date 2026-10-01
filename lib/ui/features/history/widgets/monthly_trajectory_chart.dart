@@ -10,12 +10,14 @@ class MonthlyTrajectoryChart extends StatelessWidget {
   final List<UsageTimeBucket> buckets;
   final int quotaBytes;
   final int networkType;
+  final double chartHeight;
 
   const MonthlyTrajectoryChart({
     super.key,
     required this.buckets,
     required this.quotaBytes,
     this.networkType = ChannelConstants.networkTypeAll,
+    this.chartHeight = 340.0,
   });
 
   @override
@@ -25,7 +27,7 @@ class MonthlyTrajectoryChart extends StatelessWidget {
 
     if (buckets.isEmpty) {
       return const SizedBox(
-        height: 200,
+        height: 240,
         child: Center(child: Text('No monthly activity recorded.')),
       );
     }
@@ -86,7 +88,7 @@ class MonthlyTrajectoryChart extends StatelessWidget {
 
         // Line Chart
         SizedBox(
-          height: 220,
+          height: chartHeight,
           child: LineChart(
             LineChartData(
               maxY: maxY,

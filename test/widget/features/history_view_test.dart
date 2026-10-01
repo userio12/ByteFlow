@@ -7,7 +7,6 @@ import 'package:byteflow/domain/use_cases/get_historical_summary_use_case.dart';
 import 'package:byteflow/ui/core/widgets/empty_state_card.dart';
 import 'package:byteflow/ui/features/history/view_models/history_view_model.dart';
 import 'package:byteflow/ui/features/history/views/history_view.dart';
-import 'package:byteflow/ui/features/history/widgets/history_filter_bar.dart';
 import 'package:byteflow/ui/features/history/widgets/history_filter_modal_sheet.dart';
 import 'package:byteflow/ui/features/history/widgets/hourly_spike_chart.dart';
 import 'package:byteflow/ui/features/history/widgets/weekly_comparison_chart.dart';
@@ -59,7 +58,7 @@ void main() {
     });
 
     testWidgets(
-        'renders compact filter bar, quick pills, summary banner, and charts',
+        'renders AppBar filter action, summary banner, modal sheet filter, and expanded charts',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -75,37 +74,41 @@ void main() {
       // Initial load & animations
       await tester.pumpAndSettle();
 
-      // 1. App bar and Title + Refresh
+      // 1. App bar and Title + Filter action (Refresh icon is removed)
       expect(find.text('Usage History & Trends'), findsOneWidget);
-      expect(find.byTooltip('Refresh'), findsOneWidget);
-
-      // 2. Compact HistoryFilterBar
-      expect(find.byType(HistoryFilterBar), findsOneWidget);
-      expect(find.text('Today'), findsAtLeastNWidgets(1));
-      expect(find.text('All Networks'), findsOneWidget);
+      expect(find.byTooltip('Refresh'), findsNothing);
       expect(find.byIcon(Icons.tune_rounded), findsOneWidget);
+      expect(find.byTooltip('Filter options'), findsOneWidget);
 
-      // 3. Summary Banner (No reset button initially)
+      // 2. Summary Banner (No reset button initially)
       expect(find.textContaining('Today • Total:'), findsOneWidget);
       expect(find.text('Reset Filters'), findsNothing);
 
-      // 4. Dynamic Chart Card (Today)
+      // 3. Dynamic Chart Card (Today) with expanded height
       expect(find.text('24-HOUR HOURLY TRAFFIC'), findsOneWidget);
       expect(find.byType(HourlySpikeChart), findsOneWidget);
+      final hourlyChart = tester.widget<HourlySpikeChart>(find.byType(HourlySpikeChart));
+      expect(hourlyChart.chartHeight, equals(340.0));
 
-      // 5. Test Quick-Pill Network Selection
-      await tester.tap(find.text('All Networks'));
+      // 4. Open Modal Filter Sheet via AppBar action
+      await tester.tap(find.byIcon(Icons.tune_rounded));
       await tester.pumpAndSettle();
 
-      // Tap Mobile Cellular in popup menu
+      expect(find.byType(HistoryFilterModalSheet), findsOneWidget);
+      expect(find.text('Filter History & Trends'), findsOneWidget);
+
+      // Select Mobile Cellular in filter sheet and apply
       await tester.tap(find.text('Mobile Cellular'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Apply Filters'));
       await tester.pumpAndSettle();
 
       expect(viewModel.selectedNetworkType,
           equals(ChannelConstants.networkTypeMobile));
       expect(find.text('Reset Filters'), findsOneWidget);
 
-      // 6. Test Reset Filters banner action
+      // 5. Test Reset Filters banner action
       await tester.tap(find.text('Reset Filters'));
       await tester.pumpAndSettle();
 
@@ -113,7 +116,7 @@ void main() {
           equals(ChannelConstants.networkTypeAll));
       expect(find.text('Reset Filters'), findsNothing);
 
-      // 7. Test Quick-Pill Time Range Selection
+      // 6. Test Time Range Selection via Filter Sheet
       final weekBounds = TimeRange.week.calculateBounds();
       final now = DateTime.now();
       final weekBuckets = List.generate(7, (day) {
@@ -137,28 +140,30 @@ void main() {
         averageDailyBytes: 72000000.0,
       );
 
-      // Tap Time Range pill (find the one inside HistoryFilterBar)
-      await tester.tap(find.descendant(
-        of: find.byType(HistoryFilterBar),
-        matching: find.text('Today'),
-      ));
+      // Tap filter action to open sheet
+      await tester.tap(find.byIcon(Icons.tune_rounded));
       await tester.pumpAndSettle();
 
-      // Tap Weekly in popup
+      // Select Weekly in modal sheet and apply
       await tester.tap(find.text('Weekly'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Apply Filters'));
       await tester.pumpAndSettle();
 
       expect(viewModel.selectedRange, equals(TimeRange.week));
       expect(find.text('7-DAY COMPARATIVE CONSUMPTION'), findsOneWidget);
       expect(find.byType(WeeklyComparisonChart), findsOneWidget);
+      final weeklyChart =
+          tester.widget<WeeklyComparisonChart>(find.byType(WeeklyComparisonChart));
+      expect(weeklyChart.chartHeight, equals(340.0));
       expect(find.text('Reset Filters'), findsOneWidget);
 
-      // 8. Test Deep Filter Sheet
+      // 7. Test Deep Filter Sheet Reset All action
       await tester.tap(find.byIcon(Icons.tune_rounded));
       await tester.pumpAndSettle();
 
       expect(find.byType(HistoryFilterModalSheet), findsOneWidget);
-      expect(find.text('Filter History & Trends'), findsOneWidget);
 
       // In sheet, tap Reset All
       await tester.tap(find.text('Reset All'));

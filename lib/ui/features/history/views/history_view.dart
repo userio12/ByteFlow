@@ -4,7 +4,6 @@ import '../../../../core/utils/byte_formatter.dart';
 import '../../../../domain/models/time_range.dart';
 import '../../../core/widgets/empty_state_card.dart';
 import '../view_models/history_view_model.dart';
-import '../widgets/history_filter_bar.dart';
 import '../widgets/history_filter_modal_sheet.dart';
 import '../widgets/hourly_spike_chart.dart';
 import '../widgets/monthly_trajectory_chart.dart';
@@ -64,30 +63,23 @@ class _HistoryViewState extends State<HistoryView> {
             ),
             actions: [
               IconButton(
-                icon: const Icon(AppIcons.refresh),
-                tooltip: 'Refresh',
-                onPressed: vm.loadData,
+                icon: Badge(
+                  isLabelVisible: vm.isFiltered,
+                  child: const Icon(Icons.tune_rounded),
+                ),
+                tooltip: 'Filter options',
+                onPressed: () => _openFilterSheet(context, vm),
               ),
               const SizedBox(width: 4),
             ],
           ),
           body: Column(
             children: [
-              // Compact Quick-Pills Filter Bar
-              HistoryFilterBar(
-                selectedRange: vm.selectedRange,
-                onRangeChanged: vm.setTimeRange,
-                selectedNetworkType: vm.selectedNetworkType,
-                onNetworkTypeChanged: vm.setNetworkType,
-                onOpenFilterSheet: () => _openFilterSheet(context, vm),
-                isFiltered: vm.isFiltered,
-              ),
-
               // Summary & Reset Banner
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
-                  vertical: 4.0,
+                  vertical: 8.0,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
