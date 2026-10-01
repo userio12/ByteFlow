@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:byteflow/core/theme/app_icons.dart';
 import 'package:byteflow/domain/models/app_usage_entity.dart';
 import 'package:byteflow/domain/use_cases/get_app_breakdown_use_case.dart';
 import 'package:byteflow/ui/features/app_usage/view_models/app_usage_view_model.dart';
@@ -67,8 +68,13 @@ void main() {
       );
     });
 
-    testWidgets('renders compact search filter bar and filters apps dynamically',
+    testWidgets('renders search filter bar without refresh icon or dropdowns, and filters apps via bottom sheet',
         (WidgetTester tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+
       await tester.pumpWidget(
         MaterialApp(
           home: AppUsageView(viewModel: viewModel),
@@ -81,24 +87,34 @@ void main() {
       expect(find.text('App Data Usage'), findsOneWidget);
       expect(find.byType(AppSearchFilterBar), findsOneWidget);
 
-      // 2. Verify compact quick-pills are rendered
-      expect(find.text('Today'), findsOneWidget);
-      expect(find.text('All Networks'), findsOneWidget);
-      expect(find.text('User Apps'), findsOneWidget);
-      expect(find.text('Highest Usage'), findsOneWidget);
+      // 2. Verify Refresh icon in AppBar is removed
+      expect(find.byIcon(AppIcons.refresh), findsNothing);
 
-      // 3. By default (User Apps filter), user apps render and system app is hidden
+      // 3. Verify on-screen dropdown pill menus are removed
+      expect(find.text('Today'), findsNothing);
+      expect(find.text('All Networks'), findsNothing);
+      expect(find.text('User Apps'), findsNothing);
+      expect(find.text('Highest Usage'), findsNothing);
+
+      // 4. By default (User Apps filter), user apps render and system app is hidden
       expect(find.text('YouTube'), findsOneWidget);
       expect(find.text('Chrome'), findsOneWidget);
       expect(find.text('Telegram'), findsOneWidget);
       expect(find.text('Android System'), findsNothing);
 
-      // 4. Tap App Category pill to switch to System Services
-      await tester.tap(find.text('User Apps'));
+      // 5. Open Filter Modal Sheet via tune icon
+      final filterBtn = find.byIcon(Icons.tune_rounded);
+      expect(filterBtn, findsOneWidget);
+      await tester.tap(filterBtn);
       await tester.pumpAndSettle();
 
-      expect(find.text('System Services'), findsOneWidget);
+      expect(find.byType(AppFilterModalSheet), findsOneWidget);
+      expect(find.text('Filter & Sort Apps'), findsOneWidget);
+
+      // Switch to System Services
       await tester.tap(find.text('System Services'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply Filters'));
       await tester.pumpAndSettle();
 
       expect(find.text('Android System'), findsOneWidget);
@@ -107,12 +123,12 @@ void main() {
       expect(find.text('Chrome'), findsNothing);
       expect(find.text('Telegram'), findsNothing);
 
-      // 5. Switch to "All Apps"
-      await tester.tap(find.text('System Services'));
+      // 6. Open filter sheet again and switch to "All Apps"
+      await tester.tap(filterBtn);
       await tester.pumpAndSettle();
-
-      expect(find.text('All Apps'), findsOneWidget);
       await tester.tap(find.text('All Apps'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply Filters'));
       await tester.pumpAndSettle();
 
       expect(find.text('YouTube'), findsOneWidget);
@@ -120,21 +136,17 @@ void main() {
       expect(find.text('Telegram'), findsOneWidget);
       expect(find.text('Android System'), findsOneWidget);
 
-      // 6. Switch back to "User Apps"
-      await tester.tap(find.text('All Apps'));
+      // 7. Open filter sheet and switch back to "User Apps" + "Background Hogs"
+      await tester.tap(filterBtn);
       await tester.pumpAndSettle();
       await tester.tap(find.text('User Apps'));
       await tester.pumpAndSettle();
-      expect(find.text('Android System'), findsNothing);
-
-      // 7. Test sorting: tap Sort pill and switch to "Background Hogs"
-      await tester.tap(find.text('Highest Usage'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Background Hogs'), findsOneWidget);
       await tester.tap(find.text('Background Hogs'));
       await tester.pumpAndSettle();
+      await tester.tap(find.text('Apply Filters'));
+      await tester.pumpAndSettle();
 
+      expect(find.text('Android System'), findsNothing);
       // Telegram has 9MB background bytes vs YouTube ~3MB, Chrome ~1.2MB
       // Verify Telegram is ordered first in the list
       expect(viewModel.filteredApps.first.appName, equals('Telegram'));
@@ -170,19 +182,11 @@ void main() {
       Navigator.of(tester.element(find.byType(AppDetailsBottomSheet))).pop();
       await tester.pumpAndSettle();
 
-      // 11. Open Filter Modal Sheet via tune icon
-      final filterBtn = find.byIcon(Icons.tune_rounded);
-      expect(filterBtn, findsOneWidget);
-      await tester.tap(filterBtn);
+      // 11. Test Reset Filters banner action
+      expect(find.text('Reset Filters'), findsOneWidget);
+      await tester.tap(find.text('Reset Filters'));
       await tester.pumpAndSettle();
-
-      expect(find.byType(AppFilterModalSheet), findsOneWidget);
-      expect(find.text('Filter & Sort Apps'), findsOneWidget);
-      expect(find.text('Apply Filters'), findsOneWidget);
-
-      await tester.tap(find.text('Apply Filters'));
-      await tester.pumpAndSettle();
-      expect(find.byType(AppFilterModalSheet), findsNothing);
+      expect(viewModel.isFiltered, isFalse);
     });
   });
 }

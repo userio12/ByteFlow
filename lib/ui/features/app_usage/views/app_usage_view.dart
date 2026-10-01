@@ -64,29 +64,13 @@ class _AppUsageViewState extends State<AppUsageView> {
                 letterSpacing: -0.5,
               ),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(AppIcons.refresh),
-                tooltip: 'Refresh',
-                onPressed: vm.loadApps,
-              ),
-              const SizedBox(width: 4),
-            ],
           ),
           body: Column(
             children: [
-              // Compact Search & Filter controls
+              // Search & Filter controls
               AppSearchFilterBar(
                 searchQuery: vm.searchQuery,
                 onSearchChanged: vm.setSearchQuery,
-                selectedNetworkType: vm.selectedNetworkType,
-                onNetworkTypeChanged: vm.setNetworkType,
-                selectedRange: vm.selectedRange,
-                onRangeChanged: vm.setTimeRange,
-                selectedAppType: vm.selectedAppType,
-                onAppTypeChanged: vm.setAppType,
-                selectedSortOrder: vm.sortOrder,
-                onSortOrderChanged: vm.setSortOrder,
                 onOpenFilterSheet: () => _openFilterSheet(context, vm),
                 isFiltered: vm.isFiltered,
               ),
