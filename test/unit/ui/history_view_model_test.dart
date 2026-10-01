@@ -94,5 +94,49 @@ void main() {
       expect(viewModel.selectedRange, equals(TimeRange.week));
       expect(viewModel.summary, isNotNull);
     });
+
+    test('isFiltered returns false on default and true when modified', () async {
+      expect(viewModel.isFiltered, isFalse);
+
+      viewModel.setNetworkType(ChannelConstants.networkTypeMobile);
+      expect(viewModel.isFiltered, isTrue);
+
+      viewModel.setNetworkType(ChannelConstants.networkTypeAll);
+      expect(viewModel.isFiltered, isFalse);
+
+      await viewModel.setTimeRange(TimeRange.month);
+      expect(viewModel.isFiltered, isTrue);
+    });
+
+    test('totalFilteredBytes returns appropriate totals based on network filter', () async {
+      // Summary is null initially
+      expect(viewModel.totalFilteredBytes, equals(0));
+
+      await viewModel.loadData();
+      expect(viewModel.summary, isNotNull);
+
+      // All networks: grandTotal
+      expect(viewModel.totalFilteredBytes, equals(28800000 + 144000000));
+
+      // Mobile
+      viewModel.setNetworkType(ChannelConstants.networkTypeMobile);
+      expect(viewModel.totalFilteredBytes, equals(28800000));
+
+      // Wi-Fi
+      viewModel.setNetworkType(ChannelConstants.networkTypeWifi);
+      expect(viewModel.totalFilteredBytes, equals(144000000));
+    });
+
+    test('resetFilters restores default time range and network type', () async {
+      await viewModel.setTimeRange(TimeRange.year);
+      viewModel.setNetworkType(ChannelConstants.networkTypeMobile);
+      expect(viewModel.isFiltered, isTrue);
+
+      await viewModel.resetFilters();
+
+      expect(viewModel.selectedRange, equals(TimeRange.today));
+      expect(viewModel.selectedNetworkType, equals(ChannelConstants.networkTypeAll));
+      expect(viewModel.isFiltered, isFalse);
+    });
   });
 }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/channel_constants.dart';
 import '../../../../core/theme/app_icons.dart';
+import '../../../../core/utils/byte_formatter.dart';
 import '../../../../domain/models/time_range.dart';
-import '../../../core/widgets/time_range_segmented_button.dart';
+import '../../../core/widgets/empty_state_card.dart';
 import '../view_models/history_view_model.dart';
+import '../widgets/history_filter_bar.dart';
+import '../widgets/history_filter_modal_sheet.dart';
 import '../widgets/hourly_spike_chart.dart';
 import '../widgets/monthly_trajectory_chart.dart';
 import '../widgets/weekly_comparison_chart.dart';
@@ -29,6 +31,17 @@ class _HistoryViewState extends State<HistoryView> {
     widget.viewModel.init();
   }
 
+  void _openFilterSheet(BuildContext context, HistoryViewModel vm) {
+    HistoryFilterModalSheet.show(
+      context,
+      selectedRange: vm.selectedRange,
+      onRangeChanged: vm.setTimeRange,
+      selectedNetworkType: vm.selectedNetworkType,
+      onNetworkTypeChanged: vm.setNetworkType,
+      onReset: vm.resetFilters,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -49,64 +62,62 @@ class _HistoryViewState extends State<HistoryView> {
                 letterSpacing: -0.5,
               ),
             ),
+            actions: [
+              IconButton(
+                icon: const Icon(AppIcons.refresh),
+                tooltip: 'Refresh',
+                onPressed: vm.loadData,
+              ),
+              const SizedBox(width: 4),
+            ],
           ),
           body: Column(
             children: [
-              // Top TimeRange Switcher
+              // Compact Quick-Pills Filter Bar
+              HistoryFilterBar(
+                selectedRange: vm.selectedRange,
+                onRangeChanged: vm.setTimeRange,
+                selectedNetworkType: vm.selectedNetworkType,
+                onNetworkTypeChanged: vm.setNetworkType,
+                onOpenFilterSheet: () => _openFilterSheet(context, vm),
+                isFiltered: vm.isFiltered,
+              ),
+
+              // Summary & Reset Banner
               Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16.0,
-                  vertical: 8.0,
+                  vertical: 4.0,
                 ),
-                child: TimeRangeSegmentedButton(
-                  selectedRange: vm.selectedRange,
-                  onRangeChanged: vm.setTimeRange,
-                ),
-              ),
-
-              // Network Filter Chips
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
-                child: SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: [
-                      Text(
-                        'Network: ',
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                          fontWeight: FontWeight.w600,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${vm.selectedRange.displayName} • Total: ${ByteFormatter.format(vm.totalFilteredBytes)}',
+                      style: theme.textTheme.labelMedium?.copyWith(
+                        color: colorScheme.onSurfaceVariant,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (vm.isFiltered)
+                      InkWell(
+                        onTap: vm.resetFilters,
+                        borderRadius: BorderRadius.circular(6),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 6,
+                            vertical: 2,
+                          ),
+                          child: Text(
+                            'Reset Filters',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.primary,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
                       ),
-                      const SizedBox(width: 6),
-                      _buildNetworkChip(
-                        label: 'All',
-                        icon: null,
-                        type: ChannelConstants.networkTypeAll,
-                        colorScheme: colorScheme,
-                        selectedType: vm.selectedNetworkType,
-                        onChanged: vm.setNetworkType,
-                      ),
-                      const SizedBox(width: 6),
-                      _buildNetworkChip(
-                        label: 'Mobile',
-                        icon: AppIcons.cellular,
-                        type: ChannelConstants.networkTypeMobile,
-                        colorScheme: colorScheme,
-                        selectedType: vm.selectedNetworkType,
-                        onChanged: vm.setNetworkType,
-                      ),
-                      const SizedBox(width: 6),
-                      _buildNetworkChip(
-                        label: 'Wi-Fi',
-                        icon: AppIcons.wifi,
-                        type: ChannelConstants.networkTypeWifi,
-                        colorScheme: colorScheme,
-                        selectedType: vm.selectedNetworkType,
-                        onChanged: vm.setNetworkType,
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
               ),
               const Divider(height: 1),
@@ -116,13 +127,17 @@ class _HistoryViewState extends State<HistoryView> {
                 child: vm.isLoading && summary == null
                     ? const Center(child: CircularProgressIndicator())
                     : summary == null
-                        ? Center(
-                            child: Text(
-                              'No historical telemetry recorded.',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: colorScheme.onSurfaceVariant,
-                              ),
-                            ),
+                        ? EmptyStateCard(
+                            icon: AppIcons.search,
+                            title: 'No Telemetry Recorded',
+                            message: vm.isFiltered
+                                ? 'No usage recorded matching current filter settings.'
+                                : 'No historical telemetry recorded for this timeframe.',
+                            actionLabel:
+                                vm.isFiltered ? 'Reset Filters' : 'Refresh',
+                            onActionPressed: vm.isFiltered
+                                ? vm.resetFilters
+                                : vm.loadData,
                           )
                         : RefreshIndicator(
                             onRefresh: vm.loadData,
@@ -155,7 +170,8 @@ class _HistoryViewState extends State<HistoryView> {
                                               ?.copyWith(
                                             fontWeight: FontWeight.bold,
                                             letterSpacing: 0.8,
-                                            color: colorScheme.onSurfaceVariant,
+                                            color:
+                                                colorScheme.onSurfaceVariant,
                                           ),
                                         ),
                                         const SizedBox(height: 16),
@@ -173,37 +189,6 @@ class _HistoryViewState extends State<HistoryView> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildNetworkChip({
-    required String label,
-    required IconData? icon,
-    required int type,
-    required ColorScheme colorScheme,
-    required int selectedType,
-    required ValueChanged<int> onChanged,
-  }) {
-    final isSelected = selectedType == type;
-
-    return ChoiceChip(
-      avatar: icon != null
-          ? Icon(
-              icon,
-              size: 15,
-              color: isSelected
-                  ? colorScheme.onPrimaryContainer
-                  : colorScheme.onSurfaceVariant,
-            )
-          : null,
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) => onChanged(type),
-      visualDensity: VisualDensity.compact,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-      ),
     );
   }
 

@@ -35,6 +35,31 @@ class HistoryViewModel extends ChangeNotifier {
     }
   }
 
+  bool get isFiltered =>
+      _selectedRange != TimeRange.today ||
+      _selectedNetworkType != ChannelConstants.networkTypeAll;
+
+  int get totalFilteredBytes {
+    if (_summary == null) return 0;
+    return switch (_selectedNetworkType) {
+      ChannelConstants.networkTypeMobile => _summary!.totalMobileBytes,
+      ChannelConstants.networkTypeWifi => _summary!.totalWifiBytes,
+      _ => _summary!.grandTotal,
+    };
+  }
+
+  Future<void> resetFilters() async {
+    final needReload = _selectedRange != TimeRange.today;
+    _selectedRange = TimeRange.today;
+    _selectedNetworkType = ChannelConstants.networkTypeAll;
+    _selectedHourIndex = null;
+    if (needReload) {
+      await loadData();
+    } else {
+      notifyListeners();
+    }
+  }
+
   HistoricalSummaryEntity? _summary;
   HistoricalSummaryEntity? get summary => _summary;
 
