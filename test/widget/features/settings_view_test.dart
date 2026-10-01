@@ -120,14 +120,27 @@ void main() {
       expect(find.byType(DataPrivacySettingsView), findsOneWidget);
       expect(find.byType(DataManagementCard), findsOneWidget);
 
-      // Test Export Usage Report dialog
+      // Test Export Usage Report dialog with JSON default and CSV toggle
       final exportTile = find.text('Export Usage Report');
       expect(exportTile, findsOneWidget);
       await tester.tap(exportTile);
       await tester.pumpAndSettle();
 
       expect(find.text('Export Usage Data'), findsOneWidget);
+      expect(find.text('JSON'), findsOneWidget);
+      expect(find.text('CSV'), findsOneWidget);
+      expect(find.text('Copy JSON'), findsOneWidget);
+
+      // Switch to CSV format
+      await tester.tap(find.text('CSV'));
+      await tester.pumpAndSettle();
       expect(find.text('Copy CSV'), findsOneWidget);
+
+      // Switch back to JSON format
+      await tester.tap(find.text('JSON'));
+      await tester.pumpAndSettle();
+      expect(find.text('Copy JSON'), findsOneWidget);
+
       final closeBtn = find.text('Close');
       expect(closeBtn, findsOneWidget);
       await tester.tap(closeBtn);

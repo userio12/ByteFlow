@@ -41,7 +41,7 @@ Unlike conventional monitors that run battery-draining VPN packet sniffers or re
 - Modern rounded RemoteViews widget displaying active carrier badge, today's data tally, and visual plan progress gauge.
 
 ### 7. Data Management & Backup
-- Built-in one-tap export of historical rollups and app usage to standard CSV format for user audit or offline backup.
+- Built-in one-tap export of historical rollups and app usage to standard JSON and CSV formats for user audit, external dashboard ingestion, or offline backup.
 - Local SQLite cache maintenance and vacuuming utility.
 
 ---
@@ -92,7 +92,7 @@ ByteFlow follows strict **Clean Architecture + MVVM** with unidirectional data f
 | **Foreground / Background Split**| Limited | No | **Yes (Explicit socket split)** |
 | **Multi-Timeframe Analytics** | Daily / Monthly | Real-time only | **24h, 7D, 30D, and 12Mo** |
 | **Wi-Fi Hotspot FUP Quota** | No | No | **Yes (Dual Cellular + Wi-Fi Plans)** |
-| **Data Export (CSV)** | No | No | **Yes (Built-in CSV generator)** |
+| **Data Export (JSON & CSV)** | No | No | **Yes (Built-in JSON & CSV generator)** |
 | **Home Screen Widget** | No | Basic | **Yes (Material 3 RemoteViews)** |
 | **100% On-Device Privacy** | Yes | Yes | **Yes (Zero network permissions)** |
 

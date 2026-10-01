@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/errors/app_failure.dart';
 import '../../core/functional/result.dart';
+import '../models/export_format.dart';
 
 /// Contract defining user preferences and live status bar service configuration.
 abstract interface class ISettingsRepository {
@@ -40,6 +41,15 @@ abstract interface class ISettingsRepository {
 
   /// Exports stored usage data into a CSV string for user audit/backup.
   Future<Result<String, AppFailure>> exportUsageDataAsCsv();
+
+  /// Exports stored usage data into a JSON string for user audit/backup.
+  Future<Result<String, AppFailure>> exportUsageDataAsJson({bool pretty = true});
+
+  /// Exports stored usage data in the requested [ExportFormat].
+  Future<Result<String, AppFailure>> exportUsageData({
+    ExportFormat format = ExportFormat.json,
+    bool pretty = true,
+  });
 
   /// Clears stored time-series data and vacuums database.
   Future<Result<void, AppFailure>> clearHistoricalCache();

@@ -80,7 +80,7 @@ This document outlines the phased execution strategy, automated test plan, and m
   - Run `flutter test` (100% pass) ➔ `flutter analyze` (0 warnings) ➔ `python3 -m graphify update .`.
 
 ### Phase 5: Production Hardening & Advanced Capabilities
-- [x] **Data Management & Backup**: CSV export utility and SQLite database vacuuming in `LocalDatabaseService` and `SettingsView`.
+- [x] **Data Management & Backup**: JSON and CSV export utility and SQLite database vacuuming in `LocalDatabaseService` and `SettingsView`.
 - [x] **Dual Wi-Fi Plan & FUP Tracking**: Wi-Fi plan quota management and policy cards in `PlanViewModel` and `PlanView`.
 - [x] **Localization Coverage**: Comprehensive `lib/l10n/app_en.arb` string catalog and strongly-typed getters in `AppLocalizations`.
 - [x] **R8 / ProGuard Minification Rules**: ProGuard keep rules for models, handlers, and widget providers in `proguard-rules.pro`.

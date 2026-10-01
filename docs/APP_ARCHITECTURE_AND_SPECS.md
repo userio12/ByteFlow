@@ -70,7 +70,7 @@ ByteFlow Application
         │   ├── Live status chips (Usage Access, Phone State, Notification)
         │   └── Direct system settings launch triggers
         ├── Section 4: Data Management & Backup
-        │   ├── Export Data to CSV
+        │   ├── Export Data to JSON & CSV
         │   └── Clear Cached History
         └── Section 5: About & Privacy
             ├── 100% On-Device Privacy Pledge

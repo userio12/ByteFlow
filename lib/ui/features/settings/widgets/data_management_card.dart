@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../domain/models/export_format.dart';
 
-/// Card offering data export (CSV) and local database cache purging.
+/// Card offering data export (JSON or CSV) and local database cache purging.
 class DataManagementCard extends StatelessWidget {
-  final Future<String?> Function() onExportData;
+  final Future<String?> Function(ExportFormat format) onExportData;
   final Future<bool> Function() onClearCache;
 
   const DataManagementCard({
@@ -14,10 +15,11 @@ class DataManagementCard extends StatelessWidget {
   });
 
   Future<void> _handleExport(BuildContext context) async {
-    final csv = await onExportData();
+    final initialFormat = ExportFormat.json;
+    final initialData = await onExportData(initialFormat);
     if (!context.mounted) return;
 
-    if (csv == null || csv.isEmpty) {
+    if (initialData == null || initialData.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No data available to export.')),
       );
@@ -26,58 +28,109 @@ class DataManagementCard extends StatelessWidget {
 
     await showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Export Usage Data'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Your historical network and app usage summary has been generated in CSV format:',
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.all(12),
-              constraints: const BoxConstraints(maxHeight: 180),
-              decoration: BoxDecoration(
-                color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: SingleChildScrollView(
-                child: Text(
-                  csv,
-                  style: const TextStyle(
-                    fontFamily: 'monospace',
-                    fontSize: 11,
+      builder: (ctx) {
+        var currentFormat = initialFormat;
+        var currentContent = initialData;
+        var isLoading = false;
+
+        return StatefulBuilder(
+          builder: (ctx, setState) => AlertDialog(
+            title: const Text('Export Usage Data'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: SegmentedButton<ExportFormat>(
+                    segments: const [
+                      ButtonSegment(
+                        value: ExportFormat.json,
+                        label: Text('JSON'),
+                        icon: Icon(Icons.data_object_rounded, size: 16),
+                      ),
+                      ButtonSegment(
+                        value: ExportFormat.csv,
+                        label: Text('CSV'),
+                        icon: Icon(Icons.table_chart_rounded, size: 16),
+                      ),
+                    ],
+                    selected: {currentFormat},
+                    onSelectionChanged: (newSelection) async {
+                      final newFormat = newSelection.first;
+                      if (newFormat == currentFormat) return;
+                      setState(() {
+                        isLoading = true;
+                        currentFormat = newFormat;
+                      });
+                      final newContent = await onExportData(newFormat);
+                      if (ctx.mounted) {
+                        setState(() {
+                          currentContent = newContent ?? '';
+                          isLoading = false;
+                        });
+                      }
+                    },
                   ),
                 ),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('Close'),
-          ),
-          FilledButton.icon(
-            onPressed: () async {
-              await Clipboard.setData(ClipboardData(text: csv));
-              if (ctx.mounted) {
-                Navigator.of(ctx).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('CSV report copied to clipboard!'),
-                    behavior: SnackBarBehavior.floating,
+                const SizedBox(height: 12),
+                Text(
+                  'Your historical network and app usage summary has been generated in ${currentFormat.label} format:',
+                  style: Theme.of(ctx).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  constraints: const BoxConstraints(maxHeight: 180),
+                  width: double.maxFinite,
+                  decoration: BoxDecoration(
+                    color: Theme.of(ctx).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                );
-              }
-            },
-            icon: const Icon(Icons.copy_rounded, size: 18),
-            label: const Text('Copy CSV'),
+                  child: isLoading
+                      ? const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        )
+                      : SingleChildScrollView(
+                          child: Text(
+                            currentContent,
+                            style: const TextStyle(
+                              fontFamily: 'monospace',
+                              fontSize: 11,
+                            ),
+                          ),
+                        ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(ctx).pop(),
+                child: const Text('Close'),
+              ),
+              FilledButton.icon(
+                onPressed: () async {
+                  await Clipboard.setData(ClipboardData(text: currentContent));
+                  if (ctx.mounted) {
+                    Navigator.of(ctx).pop();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${currentFormat.label} report copied to clipboard!'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                icon: const Icon(Icons.copy_rounded, size: 18),
+                label: Text('Copy ${currentFormat.label}'),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -175,7 +228,7 @@ class DataManagementCard extends StatelessWidget {
                 style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
               ),
               subtitle: Text(
-                'Generate a CSV file with network totals and app breakdown',
+                'Generate a JSON or CSV report with network totals and app breakdown',
                 style: theme.textTheme.bodySmall?.copyWith(color: colorScheme.onSurfaceVariant),
               ),
               trailing: const Icon(Icons.chevron_right_rounded),

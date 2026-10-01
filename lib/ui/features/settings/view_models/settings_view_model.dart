@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../data/services/native_network_service.dart';
+import '../../../../domain/models/export_format.dart';
 import '../../../../domain/repositories/i_settings_repository.dart';
 import '../../../../domain/use_cases/toggle_live_speed_use_case.dart';
 
@@ -156,8 +157,26 @@ class SettingsViewModel extends ChangeNotifier {
     await checkPermissions();
   }
 
+  /// Exports recorded network statistics into a JSON or CSV string.
+  Future<String?> exportUsageData({
+    ExportFormat format = ExportFormat.json,
+    bool pretty = true,
+  }) async {
+    final result = await _settingsRepository.exportUsageData(
+      format: format,
+      pretty: pretty,
+    );
+    return result.dataOrNull;
+  }
+
+  /// Exports recorded network statistics into a JSON string.
+  Future<String?> exportUsageDataAsJson({bool pretty = true}) async {
+    final result = await _settingsRepository.exportUsageDataAsJson(pretty: pretty);
+    return result.dataOrNull;
+  }
+
   /// Exports recorded network statistics into a CSV string.
-  Future<String?> exportUsageData() async {
+  Future<String?> exportUsageDataAsCsv() async {
     final result = await _settingsRepository.exportUsageDataAsCsv();
     return result.dataOrNull;
   }

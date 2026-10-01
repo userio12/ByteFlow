@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import '../../core/constants/app_constants.dart';
 import '../database/app_database.dart';
 import '../database/daos/app_usage_dao.dart';
@@ -106,6 +108,110 @@ class LocalDatabaseService {
     }
 
     return buffer.toString();
+  }
+
+  /// Exports stored usage data into a standard JSON report for backup/audit.
+  Future<String> exportUsageDataAsJson({bool pretty = true}) async {
+    final db = await _appDatabase.database;
+
+    // 1. Query daily snapshots
+    final dailyRows = await db.query(
+      DatabaseTables.tableDailySnapshots,
+      orderBy: 'date_epoch_day DESC',
+    );
+
+    // 2. Query app snapshots
+    final appRows = await db.query(
+      DatabaseTables.tableAppSnapshots,
+      orderBy: 'date_epoch_day DESC, rx_bytes + tx_bytes DESC',
+    );
+
+    // 3. Query monthly snapshots
+    final monthlyRows = await db.query(
+      DatabaseTables.tableMonthlySnapshots,
+      orderBy: 'year DESC, month DESC',
+    );
+
+    final dailyList = dailyRows.map((row) {
+      final rx = row['rx_bytes'] as int? ?? 0;
+      final tx = row['tx_bytes'] as int? ?? 0;
+      final netType = (row['network_type'] as int? ?? 0) == 0 ? 'Mobile' : 'WiFi';
+      return {
+        'date': row['date_string'] ?? '',
+        'epochDay': row['date_epoch_day'] ?? 0,
+        'networkType': netType,
+        'subId': row['sub_id'] ?? -1,
+        'rxBytes': rx,
+        'txBytes': tx,
+        'totalBytes': rx + tx,
+        'peakHour': row['peak_hour'] as int? ?? 0,
+        'peakBytes': row['peak_bytes'] as int? ?? 0,
+      };
+    }).toList();
+
+    final appList = appRows.map((row) {
+      final rx = row['rx_bytes'] as int? ?? 0;
+      final tx = row['tx_bytes'] as int? ?? 0;
+      final fgRx = row['fg_rx_bytes'] as int? ?? 0;
+      final fgTx = row['fg_tx_bytes'] as int? ?? 0;
+      final bgRx = row['bg_rx_bytes'] as int? ?? 0;
+      final bgTx = row['bg_tx_bytes'] as int? ?? 0;
+      final netType = (row['network_type'] as int? ?? 0) == 0 ? 'Mobile' : 'WiFi';
+      return {
+        'epochDay': row['date_epoch_day'] ?? 0,
+        'uid': row['uid'] ?? 0,
+        'packageName': row['package_name'] ?? '',
+        'appName': row['app_name'] ?? '',
+        'networkType': netType,
+        'rxBytes': rx,
+        'txBytes': tx,
+        'totalBytes': rx + tx,
+        'foreground': {
+          'rxBytes': fgRx,
+          'txBytes': fgTx,
+          'totalBytes': fgRx + fgTx,
+        },
+        'background': {
+          'rxBytes': bgRx,
+          'txBytes': bgTx,
+          'totalBytes': bgRx + bgTx,
+        },
+      };
+    }).toList();
+
+    final monthlyList = monthlyRows.map((row) {
+      final rx = row['rx_bytes'] as int? ?? 0;
+      final tx = row['tx_bytes'] as int? ?? 0;
+      final netType = (row['network_type'] as int? ?? 0) == 0 ? 'Mobile' : 'WiFi';
+      return {
+        'year': row['year'] ?? 0,
+        'month': row['month'] ?? 0,
+        'networkType': netType,
+        'subId': row['sub_id'] ?? -1,
+        'rxBytes': rx,
+        'txBytes': tx,
+        'totalBytes': rx + tx,
+      };
+    }).toList();
+
+    final report = <String, dynamic>{
+      'version': 1,
+      'exportedAt': DateTime.now().toIso8601String(),
+      'generator': 'ByteFlow',
+      'summary': {
+        'dailySnapshotsCount': dailyList.length,
+        'appSnapshotsCount': appList.length,
+        'monthlySnapshotsCount': monthlyList.length,
+      },
+      'dailyNetworkTotals': dailyList,
+      'appUsageSnapshots': appList,
+      'monthlyRollups': monthlyList,
+    };
+
+    if (pretty) {
+      return const JsonEncoder.withIndent('  ').convert(report);
+    }
+    return jsonEncode(report);
   }
 
   /// Clears all historical SQLite records and vacuums the database.

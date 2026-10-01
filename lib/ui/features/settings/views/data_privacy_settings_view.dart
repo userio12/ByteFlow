@@ -35,7 +35,7 @@ class DataPrivacySettingsView extends StatelessWidget {
             children: [
               // 1. Data Management & Export/Purge Controls
               DataManagementCard(
-                onExportData: viewModel.exportUsageData,
+                onExportData: (format) => viewModel.exportUsageData(format: format),
                 onClearCache: viewModel.clearHistoricalCache,
               ),
               const SizedBox(height: 16),

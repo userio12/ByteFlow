@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../core/errors/app_failure.dart';
 import '../../core/errors/exceptions.dart';
 import '../../core/functional/result.dart';
+import '../../domain/models/export_format.dart';
 import '../../domain/repositories/i_settings_repository.dart';
 import '../services/local_database_service.dart';
 import '../services/local_preferences_service.dart';
@@ -183,6 +184,34 @@ class SettingsRepositoryImpl implements ISettingsRepository {
         DatabaseFailure(message: 'Failed to export usage CSV: $e'),
       );
     }
+  }
+
+  @override
+  Future<Result<String, AppFailure>> exportUsageDataAsJson({bool pretty = true}) async {
+    try {
+      if (_databaseService == null) {
+        return const Result.failure(
+          DatabaseFailure(message: 'Database service is unavailable for export.'),
+        );
+      }
+      final json = await _databaseService.exportUsageDataAsJson(pretty: pretty);
+      return Result.success(json);
+    } catch (e) {
+      return Result.failure(
+        DatabaseFailure(message: 'Failed to export usage JSON: $e'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<String, AppFailure>> exportUsageData({
+    ExportFormat format = ExportFormat.json,
+    bool pretty = true,
+  }) async {
+    return switch (format) {
+      ExportFormat.json => exportUsageDataAsJson(pretty: pretty),
+      ExportFormat.csv => exportUsageDataAsCsv(),
+    };
   }
 
   @override

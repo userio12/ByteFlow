@@ -4,6 +4,7 @@ import 'package:byteflow/core/errors/app_failure.dart';
 import 'package:byteflow/core/functional/result.dart';
 import 'package:byteflow/domain/models/app_usage_entity.dart';
 import 'package:byteflow/domain/models/data_plan_entity.dart';
+import 'package:byteflow/domain/models/export_format.dart';
 import 'package:byteflow/domain/models/historical_summary_entity.dart';
 import 'package:byteflow/domain/models/hourly_spike_entity.dart';
 import 'package:byteflow/domain/models/network_summary_entity.dart';
@@ -200,6 +201,7 @@ class FakeSettingsRepository implements ISettingsRepository {
   bool speedUnitBits = false;
   bool onboardingCompleted = false;
   String csvToReturn = '# Mock CSV Export\nDate,Mobile,WiFi\n2026-09-26,1000,2000';
+  String jsonToReturn = '{\n  "version": 1,\n  "generator": "ByteFlow",\n  "dailyNetworkTotals": []\n}';
   AppFailure? errorToReturn;
 
   @override
@@ -277,6 +279,24 @@ class FakeSettingsRepository implements ISettingsRepository {
   Future<Result<String, AppFailure>> exportUsageDataAsCsv() async {
     if (errorToReturn != null) return Result.failure(errorToReturn!);
     return Result.success(csvToReturn);
+  }
+
+  @override
+  Future<Result<String, AppFailure>> exportUsageDataAsJson({bool pretty = true}) async {
+    if (errorToReturn != null) return Result.failure(errorToReturn!);
+    return Result.success(jsonToReturn);
+  }
+
+  @override
+  Future<Result<String, AppFailure>> exportUsageData({
+    ExportFormat format = ExportFormat.json,
+    bool pretty = true,
+  }) async {
+    if (errorToReturn != null) return Result.failure(errorToReturn!);
+    return switch (format) {
+      ExportFormat.json => Result.success(jsonToReturn),
+      ExportFormat.csv => Result.success(csvToReturn),
+    };
   }
 
   @override
