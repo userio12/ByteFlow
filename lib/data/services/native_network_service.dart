@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/services.dart';
+import 'package:permission_handler/permission_handler.dart';
 import '../../core/constants/channel_constants.dart';
 import '../../core/errors/exceptions.dart';
 import '../models/app_usage_dto.dart';
@@ -66,6 +67,44 @@ class NativeNetworkService {
         message: e.message ?? 'Failed to check phone state permission.',
         details: e.details,
       );
+    }
+  }
+
+  /// Checks whether POST_NOTIFICATIONS is granted (Android 13+).
+  Future<bool> hasNotificationPermission() async {
+    try {
+      return await Permission.notification.isGranted;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Requests POST_NOTIFICATIONS permission at runtime.
+  Future<bool> requestNotificationPermission() async {
+    try {
+      final status = await Permission.notification.request();
+      return status.isGranted;
+    } catch (_) {
+      return true;
+    }
+  }
+
+  /// Requests both POST_NOTIFICATIONS and READ_PHONE_STATE permissions.
+  Future<Map<String, bool>> requestNotificationAndPhonePermissions() async {
+    try {
+      final statuses = await [
+        Permission.notification,
+        Permission.phone,
+      ].request();
+      return {
+        'notification': statuses[Permission.notification]?.isGranted ?? false,
+        'phone': statuses[Permission.phone]?.isGranted ?? false,
+      };
+    } catch (_) {
+      return {
+        'notification': true,
+        'phone': true,
+      };
     }
   }
 

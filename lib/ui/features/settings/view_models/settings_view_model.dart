@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:permission_handler/permission_handler.dart';
 import '../../../../data/services/native_network_service.dart';
 import '../../../../domain/models/export_format.dart';
 import '../../../../domain/repositories/i_settings_repository.dart';
@@ -130,9 +129,10 @@ class SettingsViewModel extends ChangeNotifier {
   Future<void> toggleLiveSpeed(bool enabled) async {
     if (enabled) {
       // Ensure POST_NOTIFICATIONS is granted on Android 13+
-      if (!await Permission.notification.isGranted) {
-        final status = await Permission.notification.request();
-        if (!status.isGranted) {
+      final hasPermission = await _nativeService.hasNotificationPermission();
+      if (!hasPermission) {
+        final granted = await _nativeService.requestNotificationPermission();
+        if (!granted) {
           // User denied — don't enable the service
           return;
         }

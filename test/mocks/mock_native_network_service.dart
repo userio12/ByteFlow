@@ -11,6 +11,7 @@ import 'package:byteflow/data/services/native_network_service.dart';
 class MockNativeNetworkService extends NativeNetworkService {
   bool usagePermissionGranted;
   bool phoneStatePermissionGranted;
+  bool notificationPermissionGranted;
   bool isServiceRunning;
   List<SimInfoDto> simCards;
   NetworkSummaryDto? deviceTotal;
@@ -23,6 +24,7 @@ class MockNativeNetworkService extends NativeNetworkService {
   MockNativeNetworkService({
     this.usagePermissionGranted = true,
     this.phoneStatePermissionGranted = true,
+    this.notificationPermissionGranted = true,
     this.isServiceRunning = false,
     this.simCards = const [],
     this.deviceTotal,
@@ -38,6 +40,18 @@ class MockNativeNetworkService extends NativeNetworkService {
 
   @override
   Future<bool> hasPhoneStatePermission() async => phoneStatePermissionGranted;
+
+  @override
+  Future<bool> hasNotificationPermission() async => notificationPermissionGranted;
+
+  @override
+  Future<bool> requestNotificationPermission() async => notificationPermissionGranted;
+
+  @override
+  Future<Map<String, bool>> requestNotificationAndPhonePermissions() async => {
+        'notification': notificationPermissionGranted,
+        'phone': phoneStatePermissionGranted,
+      };
 
   @override
   Future<List<SimInfoDto>> getSimCards() async => simCards;
