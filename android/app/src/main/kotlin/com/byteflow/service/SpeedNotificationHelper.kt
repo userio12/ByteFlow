@@ -62,14 +62,14 @@ object SpeedNotificationHelper {
 
         // 1. PendingIntent to launch ByteFlow Main App
         val launchIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val piFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         } else {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
-        val pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, flags)
+        val pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, piFlags)
 
         // 2. Formatted Speed Strings
         val dlSpeedStr = formatSpeed(downloadBps, useBits)
@@ -128,25 +128,25 @@ object SpeedNotificationHelper {
 
             // Quick Action 1: Open Dashboard
             val dashboardIntent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra("route", "dashboard")
             }
-            val piDashboard = PendingIntent.getActivity(context, 101, dashboardIntent, flags)
+            val piDashboard = PendingIntent.getActivity(context, 101, dashboardIntent, piFlags)
             setOnClickPendingIntent(R.id.notif_btn_dashboard, piDashboard)
 
             // Quick Action 2: Open Data Plan
             val planIntent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra("route", "plan")
             }
-            val piPlan = PendingIntent.getActivity(context, 102, planIntent, flags)
+            val piPlan = PendingIntent.getActivity(context, 102, planIntent, piFlags)
             setOnClickPendingIntent(R.id.notif_btn_plan, piPlan)
 
             // Quick Action 3: Pause / Resume sampling
             val actionIntent = Intent(context, SpeedActionReceiver::class.java).apply {
                 action = if (isPaused) SpeedActionReceiver.ACTION_RESUME_SPEED else SpeedActionReceiver.ACTION_PAUSE_SPEED
             }
-            val piAction = PendingIntent.getBroadcast(context, 103, actionIntent, flags)
+            val piAction = PendingIntent.getBroadcast(context, 103, actionIntent, piFlags)
             setTextViewText(R.id.notif_btn_pause, if (isPaused) "▶ Resume" else "⏸ Pause")
             setOnClickPendingIntent(R.id.notif_btn_pause, piAction)
         }

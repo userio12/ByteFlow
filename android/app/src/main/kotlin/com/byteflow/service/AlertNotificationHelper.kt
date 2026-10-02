@@ -44,15 +44,15 @@ object AlertNotificationHelper {
         createNotificationChannel(context)
 
         val launchIntent = Intent(context, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             putExtra("route", "plan")
         }
-        val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        val piFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         } else {
             PendingIntent.FLAG_UPDATE_CURRENT
         }
-        val pendingIntent = PendingIntent.getActivity(context, 1, launchIntent, flags)
+        val pendingIntent = PendingIntent.getActivity(context, 1, launchIntent, piFlags)
 
         val notificationId = if (isWarning) WARNING_NOTIFICATION_ID else CRITICAL_NOTIFICATION_ID
 

@@ -100,14 +100,14 @@ class ByteFlowWidgetProvider : AppWidgetProvider() {
 
             // 4. Click Intent launching MainActivity
             val launchIntent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
-            val flags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val piFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             } else {
                 PendingIntent.FLAG_UPDATE_CURRENT
             }
-            val pendingIntent = PendingIntent.getActivity(context, appWidgetId, launchIntent, flags)
+            val pendingIntent = PendingIntent.getActivity(context, appWidgetId, launchIntent, piFlags)
             views.setOnClickPendingIntent(R.id.widget_root, pendingIntent)
 
             appWidgetManager.updateAppWidget(appWidgetId, views)
