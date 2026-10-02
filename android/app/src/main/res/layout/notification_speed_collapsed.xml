@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/notif_collapsed_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp"
+    android:background="@color/notif_surface">
+
+    <!-- Download Speed Block -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/notification_badge_background"
+        android:paddingStart="8dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="↓ "
+            android:textColor="@color/notif_download"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/notif_collapsed_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 B/s"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Upload Speed Block -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/notification_badge_background"
+        android:paddingStart="8dp"
+        android:paddingEnd="10dp"
+        android:paddingTop="4dp"
+        android:paddingBottom="4dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="↑ "
+            android:textColor="@color/notif_upload"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/notif_collapsed_upload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 B/s"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium" />
+    </LinearLayout>
+
+    <!-- Spacer -->
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:layout_weight="1" />
+
+    <!-- Today's Total Pill -->
+    <TextView
+        android:id="@+id/notif_collapsed_today"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Today: 0 B"
+        android:textColor="@color/notif_text_secondary"
+        android:textSize="11sp"
+        android:singleLine="true" />
+
+</LinearLayout>

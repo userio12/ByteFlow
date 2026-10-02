@@ -18,6 +18,7 @@ abstract final class ChannelConstants {
   static const String methodStartLiveSpeedService = 'startLiveSpeedService';
   static const String methodStopLiveSpeedService = 'stopLiveSpeedService';
   static const String methodIsLiveSpeedServiceRunning = 'isLiveSpeedServiceRunning';
+  static const String methodRefreshLiveSpeedNotification = 'refreshLiveSpeedNotification';
   static const String methodUpdateWidgetData = 'updateWidgetData';
   static const String methodLaunchApp = 'launchApp';
   static const String methodOpenAppDetails = 'openAppDetails';

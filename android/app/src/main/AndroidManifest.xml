@@ -79,6 +79,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Notification Quick Actions Receiver (Pause/Resume) -->
+        <receiver
+            android:name=".service.SpeedActionReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.byteflow.ACTION_PAUSE_SPEED" />
+                <action android:name="com.byteflow.ACTION_RESUME_SPEED" />
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />

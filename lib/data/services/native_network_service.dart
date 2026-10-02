@@ -229,6 +229,22 @@ class NativeNetworkService {
     }
   }
 
+  /// Triggers an immediate refresh of the native ongoing notification.
+  Future<bool> refreshLiveSpeedNotification() async {
+    try {
+      final result = await _methodChannel.invokeMethod<bool>(
+        ChannelConstants.methodRefreshLiveSpeedNotification,
+      );
+      return result ?? false;
+    } on PlatformException catch (e) {
+      throw PlatformServiceException(
+        code: e.code,
+        message: e.message ?? 'Failed to refresh LiveSpeedService notification.',
+        details: e.details,
+      );
+    }
+  }
+
   /// Pushes updated metrics to native Android Home Screen AppWidget RemoteViews.
   Future<bool> updateWidgetData({
     required String carrier,

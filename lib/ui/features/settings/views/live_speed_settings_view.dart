@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../view_models/settings_view_model.dart';
+import '../widgets/notification_preview_card.dart';
 import '../widgets/status_bar_settings_tile.dart';
 
 /// Sub-screen configuring the Android status bar foreground live speed service,
@@ -33,6 +34,14 @@ class LiveSpeedSettingsView extends StatelessWidget {
           body: ListView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
             children: [
+              // Interactive Live Notification Preview
+              NotificationPreviewCard(
+                useBits: viewModel.isSpeedUnitBits,
+                isStatusBarSpeedIcon: viewModel.isStatusBarSpeedIcon,
+                isLiveSpeedEnabled: viewModel.isLiveSpeedEnabled,
+              ),
+              const SizedBox(height: 16),
+
               // Main Speed Configuration Card
               StatusBarSettingsTile(
                 isLiveSpeedEnabled: viewModel.isLiveSpeedEnabled,
@@ -41,6 +50,8 @@ class LiveSpeedSettingsView extends StatelessWidget {
                 onIntervalChanged: viewModel.setSamplingInterval,
                 isSpeedUnitBits: viewModel.isSpeedUnitBits,
                 onUnitChanged: viewModel.setSpeedUnitBits,
+                isStatusBarSpeedIcon: viewModel.isStatusBarSpeedIcon,
+                onStatusBarIconChanged: viewModel.setStatusBarSpeedIcon,
               ),
               const SizedBox(height: 16),
 

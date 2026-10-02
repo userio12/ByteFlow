@@ -247,6 +247,21 @@ class FakeSettingsRepository implements ISettingsRepository {
     return const Result.success(null);
   }
 
+  bool statusBarSpeedIcon = true;
+
+  @override
+  Future<Result<bool, AppFailure>> isStatusBarSpeedIconEnabled() async {
+    if (errorToReturn != null) return Result.failure(errorToReturn!);
+    return Result.success(statusBarSpeedIcon);
+  }
+
+  @override
+  Future<Result<void, AppFailure>> setStatusBarSpeedIconEnabled(bool enabled) async {
+    if (errorToReturn != null) return Result.failure(errorToReturn!);
+    statusBarSpeedIcon = enabled;
+    return const Result.success(null);
+  }
+
   @override
   Future<Result<bool, AppFailure>> isOnboardingCompleted() async {
     if (errorToReturn != null) return Result.failure(errorToReturn!);

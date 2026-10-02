@@ -9,6 +9,8 @@ class StatusBarSettingsTile extends StatelessWidget {
   final ValueChanged<int> onIntervalChanged;
   final bool isSpeedUnitBits;
   final ValueChanged<bool> onUnitChanged;
+  final bool isStatusBarSpeedIcon;
+  final ValueChanged<bool>? onStatusBarIconChanged;
 
   const StatusBarSettingsTile({
     super.key,
@@ -18,6 +20,8 @@ class StatusBarSettingsTile extends StatelessWidget {
     required this.onIntervalChanged,
     required this.isSpeedUnitBits,
     required this.onUnitChanged,
+    this.isStatusBarSpeedIcon = true,
+    this.onStatusBarIconChanged,
   });
 
   @override
@@ -110,6 +114,32 @@ class StatusBarSettingsTile extends StatelessWidget {
                 ],
                 selected: {isSpeedUnitBits},
                 onSelectionChanged: (val) => onUnitChanged(val.first),
+                style: const ButtonStyle(visualDensity: VisualDensity.compact),
+              ),
+              const SizedBox(height: 16),
+
+              // Status Bar Icon Mode
+              Text(
+                'Status Bar Icon Mode',
+                style: theme.textTheme.labelMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SegmentedButton<bool>(
+                segments: const [
+                  ButtonSegment(
+                    value: true,
+                    label: Text('Dynamic Speed (14M)'),
+                  ),
+                  ButtonSegment(
+                    value: false,
+                    label: Text('ByteFlow Logo'),
+                  ),
+                ],
+                selected: {isStatusBarSpeedIcon},
+                onSelectionChanged: (val) => onStatusBarIconChanged?.call(val.first),
                 style: const ButtonStyle(visualDensity: VisualDensity.compact),
               ),
             ],

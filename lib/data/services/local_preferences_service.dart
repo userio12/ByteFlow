@@ -116,6 +116,16 @@ class LocalPreferencesService {
     await _prefs.setBool(StorageKeys.keySpeedUnitBits, useBits);
   }
 
+  /// Returns whether status bar icon displays dynamic numeric speed or static app logo.
+  bool getStatusBarSpeedIcon() {
+    return _prefs.getBool(StorageKeys.keyStatusBarSpeedIcon) ?? true;
+  }
+
+  /// Configures status bar speed icon preference.
+  Future<void> setStatusBarSpeedIcon(bool enabled) async {
+    await _prefs.setBool(StorageKeys.keyStatusBarSpeedIcon, enabled);
+  }
+
   /// Returns whether the initial onboarding flow has been completed.
   bool getOnboardingCompleted() {
     return _prefs.getBool(StorageKeys.keyOnboardingCompleted) ?? false;

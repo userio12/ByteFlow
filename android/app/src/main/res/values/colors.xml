@@ -14,4 +14,16 @@
     <color name="widget_progress_fill">#4E7DFF</color>
     <color name="widget_accent_green">#34C759</color>
     <color name="widget_accent_blue">#007AFF</color>
+
+    <!-- Notification Speed Meter Colors -->
+    <color name="notif_download">#06B6D4</color>
+    <color name="notif_upload">#EC4899</color>
+    <color name="notif_surface">#1A1C20</color>
+    <color name="notif_card_bg">#23262D</color>
+    <color name="notif_border">#353942</color>
+    <color name="notif_text_primary">#F1F3F9</color>
+    <color name="notif_text_secondary">#9DA3AE</color>
+    <color name="notif_accent_green">#10B981</color>
+    <color name="notif_action_bg">#2D313A</color>
+    <color name="notif_meter_track">#2B2E36</color>
 </resources>

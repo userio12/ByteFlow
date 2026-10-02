@@ -27,6 +27,9 @@ class SettingsViewModel extends ChangeNotifier {
   bool _isSpeedUnitBits = false;
   bool get isSpeedUnitBits => _isSpeedUnitBits;
 
+  bool _isStatusBarSpeedIcon = true;
+  bool get isStatusBarSpeedIcon => _isStatusBarSpeedIcon;
+
   ThemeMode _themeMode = ThemeMode.system;
   ThemeMode get themeMode => _themeMode;
 
@@ -69,6 +72,12 @@ class SettingsViewModel extends ChangeNotifier {
       final unitResult = await _settingsRepository.isSpeedUnitBits();
       unitResult.when(
         success: (useBits) => _isSpeedUnitBits = useBits,
+        failure: (_) {},
+      );
+
+      final iconResult = await _settingsRepository.isStatusBarSpeedIconEnabled();
+      iconResult.when(
+        success: (enabled) => _isStatusBarSpeedIcon = enabled,
         failure: (_) {},
       );
 
@@ -142,6 +151,19 @@ class SettingsViewModel extends ChangeNotifier {
     notifyListeners();
 
     await _settingsRepository.setSpeedUnitBits(useBits);
+    if (_isLiveSpeedEnabled) {
+      await _nativeService.refreshLiveSpeedNotification();
+    }
+  }
+
+  Future<void> setStatusBarSpeedIcon(bool enabled) async {
+    _isStatusBarSpeedIcon = enabled;
+    notifyListeners();
+
+    await _settingsRepository.setStatusBarSpeedIconEnabled(enabled);
+    if (_isLiveSpeedEnabled) {
+      await _nativeService.refreshLiveSpeedNotification();
+    }
   }
 
   Future<void> setThemeMode(ThemeMode mode) async {

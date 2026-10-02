@@ -93,6 +93,14 @@ class MockNativeNetworkService extends NativeNetworkService {
   @override
   Future<bool> isLiveSpeedServiceRunning() async => isServiceRunning;
 
+  bool refreshNotificationCalled = false;
+
+  @override
+  Future<bool> refreshLiveSpeedNotification() async {
+    refreshNotificationCalled = true;
+    return true;
+  }
+
   @override
   Future<bool> updateWidgetData({
     required String carrier,

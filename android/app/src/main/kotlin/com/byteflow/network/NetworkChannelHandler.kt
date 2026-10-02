@@ -179,6 +179,14 @@ class NetworkChannelHandler(
                 "isLiveSpeedServiceRunning" -> {
                     result.success(LiveSpeedService.isServiceRunning)
                 }
+                "refreshLiveSpeedNotification" -> {
+                    try {
+                        LiveSpeedService.refreshNotification(context)
+                        result.success(true)
+                    } catch (e: Exception) {
+                        result.error("REFRESH_ERROR", e.localizedMessage ?: e.message, null)
+                    }
+                }
                 "updateWidgetData" -> {
                     try {
                         val carrier = call.argument<String>("carrier") ?: "ByteFlow"

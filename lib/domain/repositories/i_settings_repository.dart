@@ -27,6 +27,12 @@ abstract interface class ISettingsRepository {
   /// Configures unit preference (bits/s vs bytes/s).
   Future<Result<void, AppFailure>> setSpeedUnitBits(bool useBits);
 
+  /// Checks whether status bar speed icon is enabled.
+  Future<Result<bool, AppFailure>> isStatusBarSpeedIconEnabled();
+
+  /// Configures status bar speed icon preference.
+  Future<Result<void, AppFailure>> setStatusBarSpeedIconEnabled(bool enabled);
+
   /// Checks whether the user has completed the onboarding flow.
   Future<Result<bool, AppFailure>> isOnboardingCompleted();
 

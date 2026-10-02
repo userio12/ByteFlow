@@ -18,6 +18,7 @@ abstract final class StorageKeys {
   static const String keyLiveSpeedEnabled = 'byteflow_live_speed_enabled';
   static const String keyLiveSpeedIntervalMs = 'byteflow_live_speed_interval_ms';
   static const String keySpeedUnitBits = 'byteflow_speed_unit_bits';
+  static const String keyStatusBarSpeedIcon = 'byteflow_status_bar_speed_icon';
 
   // Onboarding & Setup Flags
   static const String keyOnboardingCompleted = 'byteflow_onboarding_completed';

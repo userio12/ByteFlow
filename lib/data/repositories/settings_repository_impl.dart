@@ -114,6 +114,30 @@ class SettingsRepositoryImpl implements ISettingsRepository {
   }
 
   @override
+  Future<Result<bool, AppFailure>> isStatusBarSpeedIconEnabled() async {
+    try {
+      final enabled = _preferencesService.getStatusBarSpeedIcon();
+      return Result.success(enabled);
+    } catch (e) {
+      return Result.failure(
+        CacheFailure(message: 'Failed to read status bar icon preference: $e'),
+      );
+    }
+  }
+
+  @override
+  Future<Result<void, AppFailure>> setStatusBarSpeedIconEnabled(bool enabled) async {
+    try {
+      await _preferencesService.setStatusBarSpeedIcon(enabled);
+      return const Result.success(null);
+    } catch (e) {
+      return Result.failure(
+        CacheFailure(message: 'Failed to persist status bar icon preference: $e'),
+      );
+    }
+  }
+
+  @override
   Future<Result<bool, AppFailure>> isOnboardingCompleted() async {
     try {
       final completed = _preferencesService.getOnboardingCompleted();
