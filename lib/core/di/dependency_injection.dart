@@ -149,7 +149,7 @@ abstract final class DependencyInjection {
           settingsRepository: context.read<ISettingsRepository>(),
           toggleLiveSpeedUseCase: context.read<ToggleLiveSpeedUseCase>(),
           nativeService: context.read<NativeNetworkService>(),
-        ),
+        )..init(),
       ),
     ];
   }

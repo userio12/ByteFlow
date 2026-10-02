@@ -103,7 +103,7 @@ class LiveSpeedService : Service() {
                 startForeground(
                     SpeedNotificationHelper.NOTIFICATION_ID,
                     initialNotification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
                 )
             } else {
                 startForeground(SpeedNotificationHelper.NOTIFICATION_ID, initialNotification)

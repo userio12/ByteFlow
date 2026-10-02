@@ -16,7 +16,7 @@
 
     <!-- Live Speed Ongoing Foreground Service (Android 14+ typed) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- Status Bar Notifications (Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
@@ -53,7 +53,11 @@
         <service
             android:name=".service.LiveSpeedService"
             android:exported="false"
-            android:foregroundServiceType="dataSync" />
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Real-time network throughput monitoring for status bar display" />
+        </service>
 
         <!-- Home Screen AppWidget Provider -->
         <receiver

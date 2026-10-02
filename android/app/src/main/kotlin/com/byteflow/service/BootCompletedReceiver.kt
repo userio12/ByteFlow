@@ -24,7 +24,7 @@ class BootCompletedReceiver : BroadcastReceiver() {
             val flutterPrefs = context.getSharedPreferences("FlutterSharedPreferences", Context.MODE_PRIVATE)
             val isLiveSpeedEnabled = flutterPrefs.getBoolean("flutter.byteflow_live_speed_enabled", false)
             val intervalMs = try {
-                flutterPrefs.getInt("flutter.byteflow_live_speed_interval_ms", 1000).toLong()
+                flutterPrefs.getLong("flutter.byteflow_live_speed_interval_ms", 1000L)
             } catch (e: Exception) {
                 1000L
             }
