@@ -151,7 +151,11 @@ class _OnboardingViewState extends State<OnboardingView> {
                           'Auto-detect Jio, Airtel, Vi, and global carriers.',
                           'Show ongoing throughput rate in status bar shade.',
                         ],
-                        isGranted: vm.hasPhoneStatePermission,
+                        isGranted: vm.hasPhoneStatePermission && vm.hasNotificationPermission,
+                        buttonLabel: (!vm.hasPhoneStatePermission || !vm.hasNotificationPermission)
+                            ? 'Grant Permissions'
+                            : null,
+                        onButtonPressed: () => vm.requestNotificationAndPhonePermissions(),
                         accentColor: AppColors.downloadRate,
                       ),
 

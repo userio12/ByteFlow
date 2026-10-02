@@ -1,6 +1,7 @@
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
 
 import 'core/di/dependency_injection.dart';
@@ -173,6 +174,12 @@ class _MainNavigationHostState extends State<MainNavigationHost> {
       final isEnabledResult = await settingsRepo.isLiveSpeedEnabled();
       final isEnabled = isEnabledResult.dataOrNull ?? true;
       if (isEnabled && mounted) {
+        // Ensure POST_NOTIFICATIONS is granted on Android 13+
+        if (!await Permission.notification.isGranted) {
+          final status = await Permission.notification.request();
+          if (!status.isGranted) return;
+        }
+
         final intervalResult = await settingsRepo.getLiveSpeedIntervalMs();
         final intervalMs = intervalResult.dataOrNull ?? 1000;
         final nativeService = context.read<NativeNetworkService>();
