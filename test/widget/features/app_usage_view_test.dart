@@ -102,9 +102,21 @@ void main() {
       expect(find.text('Telegram'), findsOneWidget);
       expect(find.text('Android System'), findsNothing);
 
-      // 5. Open Filter Modal Sheet via tune icon
-      final filterBtn = find.byIcon(Icons.tune_rounded);
+      // 5. Verify filter icon is located in the AppBar top right corner, not in search bar
+      final filterBtn = find.descendant(
+        of: find.byType(AppBar),
+        matching: find.byIcon(Icons.tune_rounded),
+      );
       expect(filterBtn, findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppSearchFilterBar),
+          matching: find.byIcon(Icons.tune_rounded),
+        ),
+        findsNothing,
+      );
+
+      // Open Filter Modal Sheet via tune icon
       await tester.tap(filterBtn);
       await tester.pumpAndSettle();
 

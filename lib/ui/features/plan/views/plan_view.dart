@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_icons.dart';
-import '../../../core/widgets/error_snackbar.dart';
 import '../view_models/plan_view_model.dart';
 import '../widgets/carrier_status_card.dart';
-import '../widgets/edit_plan_modal_sheet.dart';
 import '../widgets/plan_summary_card.dart';
 
 /// The Plan & Quota management view presenting carrier status, quota progress, and allowance budgets.
@@ -26,26 +24,6 @@ class _PlanViewState extends State<PlanView> {
     widget.viewModel.init();
   }
 
-  void _openEditSheet() {
-    EditPlanModalSheet.show(
-      context,
-      initialPlan: widget.viewModel.plan,
-      onSave: (newPlan) async {
-        final success = await widget.viewModel.savePlan(newPlan);
-        if (mounted) {
-          if (success) {
-            ErrorSnackBar.showInfo(context, 'Data plan updated successfully.');
-          } else {
-            ErrorSnackBar.show(
-              context,
-              widget.viewModel.errorMessage ?? 'Failed to update plan.',
-            );
-          }
-        }
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -64,14 +42,6 @@ class _PlanViewState extends State<PlanView> {
                 letterSpacing: -0.5,
               ),
             ),
-            actions: [
-              IconButton(
-                icon: const Icon(AppIcons.edit),
-                tooltip: 'Edit Plan',
-                onPressed: _openEditSheet,
-              ),
-              const SizedBox(width: 8),
-            ],
           ),
           body: vm.isLoading && vm.activeSim == null
               ? const Center(child: CircularProgressIndicator())
@@ -167,7 +137,6 @@ class _PlanViewState extends State<PlanView> {
                       PlanSummaryCard(
                         plan: vm.plan,
                         usedBytes: vm.cycleUsedBytes,
-                        onEdit: _openEditSheet,
                       ),
                       const SizedBox(height: 24),
                     ],

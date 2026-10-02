@@ -48,7 +48,7 @@ void main() {
       );
     });
 
-    testWidgets('renders carrier card, plan summary, and opens edit sheet',
+    testWidgets('renders carrier card, plan summary, and confirms edit buttons are removed',
         (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -64,24 +64,10 @@ void main() {
       expect(find.byType(PlanSummaryCard), findsOneWidget);
       expect(find.text('T-Mobile'), findsOneWidget);
 
-      // 2. Tap the edit plan icon in the app bar
-      final editIcon = find.byTooltip('Edit Plan');
-      expect(editIcon, findsOneWidget);
-      await tester.tap(editIcon);
-      await tester.pumpAndSettle();
-
-      // 3. Verify EditPlanModalSheet opened
-      expect(find.text('Configure Data Plan'), findsOneWidget);
-      expect(find.text('Save Data Plan'), findsOneWidget);
-
-      // 4. Tap Save Data Plan button
-      final saveBtn = find.text('Save Data Plan');
-      await tester.tap(saveBtn);
-      await tester.pumpAndSettle();
-
-      // Sheet should close and display confirmation snackbar
-      expect(find.text('Configure Data Plan'), findsNothing);
-      expect(find.text('Data plan updated successfully.'), findsOneWidget);
+      // 2. Verify edit button is removed from AppBar and PlanSummaryCard
+      expect(find.byTooltip('Edit Plan'), findsNothing);
+      expect(find.byIcon(Icons.edit), findsNothing);
+      expect(find.byIcon(Icons.edit_rounded), findsNothing);
     });
 
     testWidgets('renders empty SIM state when no SIM detected',

@@ -91,6 +91,9 @@ void main() {
       expect(find.byType(DailyComparisonTile), findsOneWidget);
       expect(find.text('TOP CONSUMERS TODAY'), findsNothing);
 
+      // Verify Edit button is removed from screen
+      expect(find.text('Edit'), findsNothing);
+
       // 3. Test settings button tap
       final settingsBtn = find.byIcon(AppIcons.settings);
       expect(settingsBtn, findsOneWidget);
@@ -108,17 +111,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('WI-FI PLAN'), findsOneWidget);
+      expect(find.byType(DailyComparisonTile), findsOneWidget);
 
       // 6. Test switching back to Cellular via DailyComparisonTile tap
-      final cellularTile = find.text('Cellular').last;
-      await tester.tap(cellularTile);
+      final dailyTile = find.byType(DailyComparisonTile);
+      await tester.tap(dailyTile);
       await tester.pumpAndSettle();
 
       expect(find.textContaining('CELLULAR PLAN'), findsOneWidget);
 
       // 7. Test switching to Wi-Fi via DailyComparisonTile tap
-      final wifiTile = find.text('Wi-Fi').last;
-      await tester.tap(wifiTile);
+      await tester.tap(dailyTile);
       await tester.pumpAndSettle();
 
       expect(find.textContaining('WI-FI PLAN'), findsOneWidget);

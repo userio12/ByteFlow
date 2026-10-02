@@ -138,7 +138,6 @@ class _DashboardViewState extends State<DashboardView> {
                         plan: vm.activePlan,
                         usedMobileBytes: vm.activeUsedBytes,
                         category: vm.selectedCategory,
-                        onEditPlan: widget.onNavigateToPlan,
                       ),
                       const SizedBox(height: 12),
 

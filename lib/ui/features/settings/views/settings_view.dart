@@ -1,24 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../../core/theme/app_icons.dart';
+import '../../plan/view_models/plan_view_model.dart';
 import '../view_models/settings_view_model.dart';
 import 'about_settings_view.dart';
 import 'appearance_settings_view.dart';
+import 'data_plan_settings_view.dart';
 import 'data_privacy_settings_view.dart';
 import 'live_speed_settings_view.dart';
 import 'system_health_settings_view.dart';
 
-/// The root Settings hub organizing ByteFlow into 5 modular nested sub-screens:
+/// The root Settings hub organizing ByteFlow into modular nested sub-screens:
 /// 1. Live Speed & Monitoring
 /// 2. Battery & System Health
-/// 3. Data & Storage Management
+/// 3. Data Plan & Quotas
 /// 4. Appearance
-/// 5. About ByteFlow
+/// 5. Data & Storage Management
+/// 6. About ByteFlow
 class SettingsView extends StatefulWidget {
   final SettingsViewModel viewModel;
+  final PlanViewModel? planViewModel;
 
   const SettingsView({
     super.key,
     required this.viewModel,
+    this.planViewModel,
   });
 
   @override
@@ -109,6 +115,23 @@ class _SettingsViewState extends State<SettingsView> {
                       onTap: () => _navigateTo(
                         SystemHealthSettingsView(viewModel: vm),
                       ),
+                    ),
+                    const Divider(height: 1, indent: 56),
+                    _buildSettingsTile(
+                      context,
+                      icon: AppIcons.planActive,
+                      iconColor: colorScheme.primary,
+                      title: 'Data Plan & Quotas',
+                      subtitle: 'Configure cellular & Wi-Fi billing cycles and allowances',
+                      onTap: () {
+                        final planVm = widget.planViewModel ??
+                            context.read<PlanViewModel?>();
+                        if (planVm != null) {
+                          _navigateTo(
+                            DataPlanSettingsView(viewModel: planVm),
+                          );
+                        }
+                      },
                     ),
                   ],
                 ),

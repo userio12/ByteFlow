@@ -1,7 +1,14 @@
+import 'package:byteflow/domain/models/data_plan_entity.dart';
+import 'package:byteflow/domain/use_cases/get_active_sim_info_use_case.dart';
+import 'package:byteflow/domain/use_cases/get_data_plan_use_case.dart';
+import 'package:byteflow/domain/use_cases/get_today_usage_use_case.dart';
+import 'package:byteflow/domain/use_cases/save_data_plan_use_case.dart';
 import 'package:byteflow/domain/use_cases/toggle_live_speed_use_case.dart';
+import 'package:byteflow/ui/features/plan/view_models/plan_view_model.dart';
 import 'package:byteflow/ui/features/settings/view_models/settings_view_model.dart';
 import 'package:byteflow/ui/features/settings/views/about_settings_view.dart';
 import 'package:byteflow/ui/features/settings/views/appearance_settings_view.dart';
+import 'package:byteflow/ui/features/settings/views/data_plan_settings_view.dart';
 import 'package:byteflow/ui/features/settings/views/data_privacy_settings_view.dart';
 import 'package:byteflow/ui/features/settings/views/live_speed_settings_view.dart';
 import 'package:byteflow/ui/features/settings/views/settings_view.dart';
@@ -19,11 +26,16 @@ import '../../mocks/mock_repositories.dart';
 void main() {
   group('SettingsView Hub & Sub-Screens Widget Test', () {
     late FakeSettingsRepository fakeSettingsRepo;
+    late FakeNetworkRepository fakeNetworkRepo;
+    late FakePlanRepository fakePlanRepo;
     late MockNativeNetworkService mockNativeService;
     late SettingsViewModel viewModel;
+    late PlanViewModel planViewModel;
 
     setUp(() {
       fakeSettingsRepo = FakeSettingsRepository();
+      fakeNetworkRepo = FakeNetworkRepository();
+      fakePlanRepo = FakePlanRepository();
       mockNativeService = MockNativeNetworkService(
         usagePermissionGranted: true,
         phoneStatePermissionGranted: true,
@@ -34,9 +46,24 @@ void main() {
         toggleLiveSpeedUseCase: ToggleLiveSpeedUseCase(fakeSettingsRepo),
         nativeService: mockNativeService,
       );
+
+      fakePlanRepo.plan = const DataPlanEntity(
+        quotaBytes: 5368709120, // 5 GB
+        cycleType: DataPlanCycleType.monthly,
+        resetDay: 1,
+      );
+
+      planViewModel = PlanViewModel(
+        getDataPlanUseCase: GetDataPlanUseCase(fakePlanRepo),
+        saveDataPlanUseCase: SaveDataPlanUseCase(fakePlanRepo),
+        getActiveSimInfoUseCase: GetActiveSimInfoUseCase(fakeNetworkRepo),
+        getTodayUsageUseCase: GetTodayUsageUseCase(fakeNetworkRepo),
+        planRepository: fakePlanRepo,
+        settingsRepository: fakeSettingsRepo,
+      );
     });
 
-    testWidgets('renders all 5 settings sub-screen hub tiles and navigates seamlessly',
+    testWidgets('renders all 6 settings sub-screen hub tiles and navigates seamlessly',
         (WidgetTester tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -45,7 +72,10 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
-          home: SettingsView(viewModel: viewModel),
+          home: SettingsView(
+            viewModel: viewModel,
+            planViewModel: planViewModel,
+          ),
         ),
       );
 
@@ -57,9 +87,10 @@ void main() {
       expect(find.text('PREFERENCES & DATA'), findsOneWidget);
       expect(find.text('ABOUT'), findsOneWidget);
 
-      // Verify the 5 Hub Navigation Tiles exist
+      // Verify the 6 Hub Navigation Tiles exist
       expect(find.text('Live Speed & Monitoring'), findsOneWidget);
       expect(find.text('Battery & System Health'), findsOneWidget);
+      expect(find.text('Data Plan & Quotas'), findsOneWidget);
       expect(find.text('Appearance'), findsOneWidget);
       expect(find.text('Data & Storage Management'), findsOneWidget);
       expect(find.text('About ByteFlow'), findsOneWidget);
@@ -96,7 +127,23 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(SettingsView), findsOneWidget);
 
-      // --- SUB-SCREEN 3: Appearance ---
+      // --- SUB-SCREEN 3: Data Plan & Quotas ---
+      await tester.tap(find.text('Data Plan & Quotas'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DataPlanSettingsView), findsOneWidget);
+      expect(find.text('CONFIGURE CELLULAR PLAN'), findsOneWidget);
+      expect(find.text('Save Data Plan'), findsOneWidget);
+
+      await tester.tap(find.text('Save Data Plan'));
+      await tester.pumpAndSettle();
+
+      // Pop back to Hub
+      await tester.pageBack();
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsView), findsOneWidget);
+
+      // --- SUB-SCREEN 4: Appearance ---
       await tester.tap(find.text('Appearance'));
       await tester.pumpAndSettle();
 

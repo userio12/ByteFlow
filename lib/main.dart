@@ -167,6 +167,7 @@ class _MainNavigationHostState extends State<MainNavigationHost> {
       MaterialPageRoute(
         builder: (_) => SettingsView(
           viewModel: context.read<SettingsViewModel>(),
+          planViewModel: context.read<PlanViewModel>(),
         ),
       ),
     );

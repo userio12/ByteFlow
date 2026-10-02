@@ -9,13 +9,11 @@ import '../../../../domain/models/data_plan_entity.dart';
 class PlanSummaryCard extends StatelessWidget {
   final DataPlanEntity plan;
   final int usedBytes;
-  final VoidCallback? onEdit;
 
   const PlanSummaryCard({
     super.key,
     required this.plan,
     required this.usedBytes,
-    this.onEdit,
   });
 
   @override
@@ -44,28 +42,17 @@ class PlanSummaryCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(AppIcons.planActive, size: 18, color: colorScheme.primary),
-                    const SizedBox(width: 8),
-                    Text(
-                      'PLAN QUOTA & BUDGET',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                if (onEdit != null)
-                  IconButton(
-                    icon: const Icon(AppIcons.edit, size: 20),
-                    tooltip: 'Edit Plan Quota',
-                    onPressed: onEdit,
+                Icon(AppIcons.planActive, size: 18, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  'PLAN QUOTA & BUDGET',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                    color: colorScheme.onSurfaceVariant,
                   ),
+                ),
               ],
             ),
             const SizedBox(height: 12),

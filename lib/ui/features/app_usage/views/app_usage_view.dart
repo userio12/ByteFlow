@@ -64,15 +64,24 @@ class _AppUsageViewState extends State<AppUsageView> {
                 letterSpacing: -0.5,
               ),
             ),
+            actions: [
+              IconButton(
+                icon: Badge(
+                  isLabelVisible: vm.isFiltered,
+                  child: const Icon(Icons.tune_rounded),
+                ),
+                tooltip: 'Filter options',
+                onPressed: () => _openFilterSheet(context, vm),
+              ),
+              const SizedBox(width: 4),
+            ],
           ),
           body: Column(
             children: [
-              // Search & Filter controls
+              // Search controls
               AppSearchFilterBar(
                 searchQuery: vm.searchQuery,
                 onSearchChanged: vm.setSearchQuery,
-                onOpenFilterSheet: () => _openFilterSheet(context, vm),
-                isFiltered: vm.isFiltered,
               ),
 
               // Summary & Reset Banner

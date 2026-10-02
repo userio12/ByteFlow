@@ -12,14 +12,12 @@ class PlanProgressRing extends StatelessWidget {
   final DataPlanEntity plan;
   final int usedMobileBytes;
   final PlanCategory category;
-  final VoidCallback? onEditPlan;
 
   const PlanProgressRing({
     super.key,
     required this.plan,
     required this.usedMobileBytes,
     this.category = PlanCategory.cellular,
-    this.onEditPlan,
   });
 
   @override
@@ -62,45 +60,19 @@ class PlanProgressRing extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title & Edit Button
+            // Title Header
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(categoryIcon, size: 18, color: categoryColor),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${plan.cycleType.displayName.toUpperCase()} $categoryLabel PLAN',
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 0.8,
-                        color: colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-                if (onEditPlan != null)
-                  InkWell(
-                    onTap: onEditPlan,
-                    borderRadius: BorderRadius.circular(8),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      child: Row(
-                        children: [
-                          Icon(AppIcons.edit, size: 14, color: colorScheme.primary),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Edit',
-                            style: theme.textTheme.labelSmall?.copyWith(
-                              color: colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                Icon(categoryIcon, size: 18, color: categoryColor),
+                const SizedBox(width: 8),
+                Text(
+                  '${plan.cycleType.displayName.toUpperCase()} $categoryLabel PLAN',
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                    color: colorScheme.onSurfaceVariant,
                   ),
+                ),
               ],
             ),
             const SizedBox(height: 16),

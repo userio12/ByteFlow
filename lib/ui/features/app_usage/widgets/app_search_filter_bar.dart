@@ -1,19 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_icons.dart';
 
-/// Compact search and filter bar for App Usage screen with integrated filter sheet launcher.
+/// Compact search bar for App Usage screen.
 class AppSearchFilterBar extends StatefulWidget {
   final String searchQuery;
   final ValueChanged<String> onSearchChanged;
-  final VoidCallback? onOpenFilterSheet;
-  final bool isFiltered;
 
   const AppSearchFilterBar({
     super.key,
     required this.searchQuery,
     required this.onSearchChanged,
-    this.onOpenFilterSheet,
-    this.isFiltered = false,
   });
 
   @override
@@ -50,53 +46,32 @@ class _AppSearchFilterBarState extends State<AppSearchFilterBar> {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 4.0),
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              onChanged: widget.onSearchChanged,
-              decoration: InputDecoration(
-                hintText: 'Search app or package...',
-                hintStyle: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-                prefixIcon: const Icon(AppIcons.search, size: 20),
-                suffixIcon: _controller.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, size: 18),
-                        onPressed: () {
-                          _controller.clear();
-                          widget.onSearchChanged('');
-                        },
-                      )
-                    : null,
-                filled: true,
-                fillColor: colorScheme.surfaceContainerHigh,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
+      child: TextField(
+        controller: _controller,
+        onChanged: widget.onSearchChanged,
+        decoration: InputDecoration(
+          hintText: 'Search app or package...',
+          hintStyle: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurfaceVariant,
           ),
-          if (widget.onOpenFilterSheet != null) ...[
-            const SizedBox(width: 8),
-            IconButton(
-              onPressed: widget.onOpenFilterSheet,
-              tooltip: 'Filter options',
-              icon: Badge(
-                isLabelVisible: widget.isFiltered,
-                child: Icon(
-                  Icons.tune_rounded,
-                  color: widget.isFiltered ? colorScheme.primary : colorScheme.onSurfaceVariant,
-                  size: 22,
-                ),
-              ),
-            ),
-          ],
-        ],
+          prefixIcon: const Icon(AppIcons.search, size: 20),
+          suffixIcon: _controller.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear_rounded, size: 18),
+                  onPressed: () {
+                    _controller.clear();
+                    widget.onSearchChanged('');
+                  },
+                )
+              : null,
+          filled: true,
+          fillColor: colorScheme.surfaceContainerHigh,
+          contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(14),
+            borderSide: BorderSide.none,
+          ),
+        ),
       ),
     );
   }
