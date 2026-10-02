@@ -87,7 +87,7 @@ class LocalPreferencesService {
 
   /// Returns whether live speed indicator service is enabled.
   bool getLiveSpeedEnabled() {
-    return _prefs.getBool(StorageKeys.keyLiveSpeedEnabled) ?? false;
+    return _prefs.getBool(StorageKeys.keyLiveSpeedEnabled) ?? true;
   }
 
   /// Sets live speed indicator toggle state.

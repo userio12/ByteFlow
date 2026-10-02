@@ -84,6 +84,7 @@ void main() {
 
       expect(onFinishedCalled, isTrue);
       expect(fakeSettingsRepo.onboardingCompleted, isTrue);
+      expect(fakeSettingsRepo.liveSpeedEnabled, isTrue);
     });
 
     testWidgets('Skip button immediately completes onboarding',
@@ -114,6 +115,7 @@ void main() {
 
       expect(onFinishedCalled, isTrue);
       expect(fakeSettingsRepo.onboardingCompleted, isTrue);
+      expect(fakeSettingsRepo.liveSpeedEnabled, isTrue);
     });
   });
 }

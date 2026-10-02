@@ -56,6 +56,7 @@ class OnboardingViewModel extends ChangeNotifier {
 
   Future<void> completeOnboarding() async {
     await _settingsRepository.setOnboardingCompleted(true);
+    await _settingsRepository.setLiveSpeedEnabled(true);
     _isCompleted = true;
     notifyListeners();
   }

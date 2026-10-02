@@ -30,7 +30,9 @@ object SpeedNotificationHelper {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val name = context.getString(R.string.speed_channel_name)
             val desc = context.getString(R.string.speed_channel_desc)
-            val importance = NotificationManager.IMPORTANCE_LOW
+            // IMPORTANCE_DEFAULT prevents Android 12+ from classifying the speed meter
+            // as 'Silent' and hiding the status bar icon or minimizing it to the bottom.
+            val importance = NotificationManager.IMPORTANCE_DEFAULT
 
             val channel = NotificationChannel(CHANNEL_ID, name, importance).apply {
                 description = desc
@@ -62,7 +64,7 @@ object SpeedNotificationHelper {
 
         // 1. PendingIntent to launch ByteFlow Main App
         val launchIntent = Intent(context, MainActivity::class.java).apply {
-            this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val piFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
@@ -128,7 +130,7 @@ object SpeedNotificationHelper {
 
             // Quick Action 1: Open Dashboard
             val dashboardIntent = Intent(context, MainActivity::class.java).apply {
-                this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra("route", "dashboard")
             }
             val piDashboard = PendingIntent.getActivity(context, 101, dashboardIntent, piFlags)
@@ -136,17 +138,20 @@ object SpeedNotificationHelper {
 
             // Quick Action 2: Open Data Plan
             val planIntent = Intent(context, MainActivity::class.java).apply {
-                this.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
                 putExtra("route", "plan")
             }
             val piPlan = PendingIntent.getActivity(context, 102, planIntent, piFlags)
             setOnClickPendingIntent(R.id.notif_btn_plan, piPlan)
 
             // Quick Action 3: Pause / Resume sampling
+            // Using separate request codes (103 for pause, 104 for resume) ensures FLAG_IMMUTABLE
+            // does not prevent the intent action from switching properly.
             val actionIntent = Intent(context, SpeedActionReceiver::class.java).apply {
                 action = if (isPaused) SpeedActionReceiver.ACTION_RESUME_SPEED else SpeedActionReceiver.ACTION_PAUSE_SPEED
             }
-            val piAction = PendingIntent.getBroadcast(context, 103, actionIntent, piFlags)
+            val actionRequestCode = if (isPaused) 104 else 103
+            val piAction = PendingIntent.getBroadcast(context, actionRequestCode, actionIntent, piFlags)
             setTextViewText(R.id.notif_btn_pause, if (isPaused) "▶ Resume" else "⏸ Pause")
             setOnClickPendingIntent(R.id.notif_btn_pause, piAction)
         }
@@ -159,19 +164,27 @@ object SpeedNotificationHelper {
             .setOnlyAlertOnce(true)
             .setContentIntent(pendingIntent)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setShowWhen(false)
             .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setCustomContentView(viewsCollapsed)
             .setCustomBigContentView(viewsExpanded)
 
-        // 6. Status Bar Icon: Dynamic numeric icon vs static launcher icon
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            builder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+        }
+
+        // 6. Status Bar Icon: Dynamic numeric icon vs static vector icon
         if (useDynamicIcon) {
-            val icon = SpeedIconGenerator.getDynamicSpeedIcon(totalBps, useBits)
-            builder.setSmallIcon(icon)
+            try {
+                val icon = SpeedIconGenerator.getDynamicSpeedIcon(totalBps, useBits)
+                builder.setSmallIcon(icon)
+            } catch (_: Exception) {
+                builder.setSmallIcon(R.drawable.ic_stat_speed)
+            }
         } else {
-            builder.setSmallIcon(R.mipmap.ic_launcher)
+            builder.setSmallIcon(R.drawable.ic_stat_speed)
         }
 
         if (!carrierName.isNullOrEmpty()) {

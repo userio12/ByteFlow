@@ -96,28 +96,36 @@ class LiveSpeedService : Service() {
 
         SpeedNotificationHelper.createNotificationChannel(this)
 
-        val initialNotification = buildCurrentNotification(0L, 0L)
+        try {
+            val initialNotification = buildCurrentNotification(0L, 0L)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                SpeedNotificationHelper.NOTIFICATION_ID,
-                initialNotification,
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            )
-        } else {
-            startForeground(SpeedNotificationHelper.NOTIFICATION_ID, initialNotification)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    SpeedNotificationHelper.NOTIFICATION_ID,
+                    initialNotification,
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            } else {
+                startForeground(SpeedNotificationHelper.NOTIFICATION_ID, initialNotification)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("LiveSpeedService", "Error during startForeground: ${e.message}", e)
         }
 
-        screenReceiver = ScreenReceiver(
-            onScreenOff = { stopSampling() },
-            onScreenOn = {
-                if (!isPaused) {
-                    resetBaseline()
-                    startSampling()
+        try {
+            screenReceiver = ScreenReceiver(
+                onScreenOff = { stopSampling() },
+                onScreenOn = {
+                    if (!isPaused) {
+                        resetBaseline()
+                        startSampling()
+                    }
                 }
-            }
-        )
-        screenReceiver.register(this)
+            )
+            screenReceiver.register(this)
+        } catch (e: Exception) {
+            android.util.Log.e("LiveSpeedService", "Error registering screenReceiver: ${e.message}", e)
+        }
 
         resetBaseline()
         startSampling()
@@ -183,8 +191,12 @@ class LiveSpeedService : Service() {
     }
 
     private fun updateNotification(downloadBps: Long, uploadBps: Long) {
-        val notification = buildCurrentNotification(downloadBps, uploadBps)
-        notificationManager.notify(SpeedNotificationHelper.NOTIFICATION_ID, notification)
+        try {
+            val notification = buildCurrentNotification(downloadBps, uploadBps)
+            notificationManager.notify(SpeedNotificationHelper.NOTIFICATION_ID, notification)
+        } catch (e: Exception) {
+            android.util.Log.e("LiveSpeedService", "Failed to update notification: ${e.message}", e)
+        }
     }
 
     private fun buildCurrentNotification(downloadBps: Long, uploadBps: Long): android.app.Notification {

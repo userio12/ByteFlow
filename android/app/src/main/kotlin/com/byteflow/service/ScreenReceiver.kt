@@ -4,6 +4,8 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.util.Log
+import androidx.core.content.ContextCompat
 
 /**
  * Dynamic broadcast receiver monitoring screen on/off events to halt
@@ -29,8 +31,23 @@ class ScreenReceiver(
                 addAction(Intent.ACTION_SCREEN_OFF)
                 addAction(Intent.ACTION_SCREEN_ON)
             }
-            context.registerReceiver(this, filter)
-            isRegistered = true
+            try {
+                ContextCompat.registerReceiver(
+                    context,
+                    this,
+                    filter,
+                    ContextCompat.RECEIVER_NOT_EXPORTED
+                )
+                isRegistered = true
+            } catch (e: Exception) {
+                Log.w("ScreenReceiver", "Failed to register screen receiver with RECEIVER_NOT_EXPORTED, trying fallback: ${e.message}")
+                try {
+                    context.registerReceiver(this, filter)
+                    isRegistered = true
+                } catch (err: Exception) {
+                    Log.e("ScreenReceiver", "Could not register screen receiver: ${err.message}")
+                }
+            }
         }
     }
 

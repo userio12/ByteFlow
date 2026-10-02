@@ -6,6 +6,8 @@ import 'package:provider/provider.dart';
 import 'core/di/dependency_injection.dart';
 import 'core/theme/app_theme.dart';
 import 'data/services/local_preferences_service.dart';
+import 'data/services/native_network_service.dart';
+import 'domain/repositories/i_settings_repository.dart';
 import 'l10n/app_localizations.dart';
 import 'ui/core/widgets/adaptive_scaffold.dart';
 import 'ui/features/app_usage/view_models/app_usage_view_model.dart';
@@ -155,6 +157,29 @@ class MainNavigationHost extends StatefulWidget {
 
 class _MainNavigationHostState extends State<MainNavigationHost> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _restoreLiveSpeedServiceIfEnabled();
+    });
+  }
+
+  Future<void> _restoreLiveSpeedServiceIfEnabled() async {
+    if (!mounted) return;
+    try {
+      final settingsRepo = context.read<ISettingsRepository>();
+      final isEnabledResult = await settingsRepo.isLiveSpeedEnabled();
+      final isEnabled = isEnabledResult.dataOrNull ?? true;
+      if (isEnabled && mounted) {
+        final intervalResult = await settingsRepo.getLiveSpeedIntervalMs();
+        final intervalMs = intervalResult.dataOrNull ?? 1000;
+        final nativeService = context.read<NativeNetworkService>();
+        await nativeService.startLiveSpeedService(intervalMs: intervalMs);
+      }
+    } catch (_) {}
+  }
 
   void _setDestination(int index) {
     setState(() {
