@@ -26,6 +26,9 @@ import com.byteflow.model.UsageBucketRecord
  */
 object NetworkStatsHelper {
 
+    private data class AppMetadata(val appName: String, val isSystemApp: Boolean)
+    private val appMetadataCache = java.util.concurrent.ConcurrentHashMap<String, AppMetadata>()
+
     /**
      * Checks whether the user has granted PACKAGE_USAGE_STATS permission via AppOpsManager.
      */
@@ -229,13 +232,12 @@ object NetworkStatsHelper {
                     val record = appMap.getOrPut(uid) {
                         val packages = pm.getPackagesForUid(uid)
                         val packageName = packages?.firstOrNull() ?: resolveSpecialUidPackage(uid)
-                        val appName = resolveAppLabel(pm, packageName, uid)
-                        val isSystem = isSystemApp(pm, packageName, uid)
+                        val metadata = resolveAppMetadata(pm, packageName, uid)
                         AppUsageRecord(
                             uid = uid,
                             packageName = packageName,
-                            appName = appName,
-                            isSystemApp = isSystem
+                            appName = metadata.appName,
+                            isSystemApp = metadata.isSystemApp
                         )
                     }
 
@@ -336,40 +338,39 @@ object NetworkStatsHelper {
         }
     }
 
-    private fun resolveAppLabel(pm: PackageManager, packageName: String, uid: Int): String {
+    private fun resolveAppMetadata(pm: PackageManager, packageName: String, uid: Int): AppMetadata {
+        appMetadataCache[packageName]?.let { return it }
+
         when (uid) {
-            0 -> return "Android OS / Kernel"
-            1000 -> return "Android System"
-            NetworkStats.Bucket.UID_REMOVED -> return "Removed Apps"
-            NetworkStats.Bucket.UID_TETHERING -> return "Hotspot & Tethering"
+            0 -> return AppMetadata("Android OS / Kernel", true).also { appMetadataCache[packageName] = it }
+            1000 -> return AppMetadata("Android System", true).also { appMetadataCache[packageName] = it }
+            NetworkStats.Bucket.UID_REMOVED -> return AppMetadata("Removed Apps", true).also { appMetadataCache[packageName] = it }
+            NetworkStats.Bucket.UID_TETHERING -> return AppMetadata("Hotspot & Tethering", true).also { appMetadataCache[packageName] = it }
+        }
+
+        if (packageName == "android" || packageName.startsWith("android.") || packageName.startsWith("uid_") || uid < Process.FIRST_APPLICATION_UID) {
+            val label = try {
+                val appInfo = pm.getApplicationInfo(packageName, 0)
+                pm.getApplicationLabel(appInfo).toString()
+            } catch (_: Exception) {
+                packageName
+            }
+            return AppMetadata(label, true).also { appMetadataCache[packageName] = it }
         }
 
         return try {
             val appInfo = pm.getApplicationInfo(packageName, 0)
-            pm.getApplicationLabel(appInfo).toString()
-        } catch (_: Exception) {
-            packageName
-        }
-    }
-
-    private fun isSystemApp(pm: PackageManager, packageName: String, uid: Int): Boolean {
-        if (uid < Process.FIRST_APPLICATION_UID) return true
-        if (packageName == "android" || packageName.startsWith("android.") || packageName.startsWith("uid_")) {
-            return true
-        }
-        return try {
-            // User-facing apps that can be launched from app drawer (e.g. YouTube, Chrome, Maps)
-            // should not be hidden as system daemons even if pre-installed in /system.
+            val appName = pm.getApplicationLabel(appInfo).toString()
             val hasLaunchIntent = pm.getLaunchIntentForPackage(packageName) != null
-            if (hasLaunchIntent) {
+            val isSystem = if (hasLaunchIntent) {
                 false
             } else {
-                val appInfo = pm.getApplicationInfo(packageName, 0)
                 (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0 ||
                 (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
             }
+            AppMetadata(appName, isSystem).also { appMetadataCache[packageName] = it }
         } catch (_: Exception) {
-            uid < Process.FIRST_APPLICATION_UID
+            AppMetadata(packageName, uid < Process.FIRST_APPLICATION_UID).also { appMetadataCache[packageName] = it }
         }
     }
 }
