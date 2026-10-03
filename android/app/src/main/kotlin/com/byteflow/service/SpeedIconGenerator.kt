@@ -18,6 +18,7 @@ object SpeedIconGenerator {
     private const val BITMAP_SIZE = 48 // 48x48 px standard status bar icon canvas
     private var lastRenderedKey: String? = null
     private var cachedIcon: IconCompat? = null
+    private var cachedBitmap: Bitmap? = null
 
     private val numberPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.WHITE
@@ -80,15 +81,16 @@ object SpeedIconGenerator {
     }
 
     /**
-     * Builds or returns cached IconCompat bitmap representing current speed.
+     * Builds or returns cached Bitmap representing current speed.
+     * Designed for NotificationCompat.Builder.setLargeIcon.
      */
     @Synchronized
-    fun getDynamicSpeedIcon(bytesPerSec: Long, useBits: Boolean): IconCompat {
+    fun getSpeedBitmap(bytesPerSec: Long, useBits: Boolean): Bitmap {
         val (number, unit) = getSpeedParts(bytesPerSec, useBits)
         val cacheKey = "$number|$unit"
 
-        if (cacheKey == lastRenderedKey && cachedIcon != null) {
-            return cachedIcon!!
+        if (cacheKey == lastRenderedKey && cachedBitmap != null && !cachedBitmap!!.isRecycled) {
+            return cachedBitmap!!
         }
 
         val bitmap = Bitmap.createBitmap(BITMAP_SIZE, BITMAP_SIZE, Bitmap.Config.ARGB_8888)
@@ -112,9 +114,18 @@ object SpeedIconGenerator {
         // Draw bottom tier (unit) centered at y = 43
         canvas.drawText(unit, (BITMAP_SIZE / 2).toFloat(), 43f, unitPaint)
 
-        val icon = IconCompat.createWithBitmap(bitmap)
         lastRenderedKey = cacheKey
-        cachedIcon = icon
-        return icon
+        cachedBitmap = bitmap
+        cachedIcon = IconCompat.createWithBitmap(bitmap)
+        return bitmap
+    }
+
+    /**
+     * Builds or returns cached IconCompat representing current speed.
+     */
+    @Synchronized
+    fun getDynamicSpeedIcon(bytesPerSec: Long, useBits: Boolean): IconCompat {
+        getSpeedBitmap(bytesPerSec, useBits)
+        return cachedIcon!!
     }
 }

@@ -186,7 +186,9 @@ class _MainNavigationHostState extends State<MainNavigationHost> {
         final intervalMs = intervalResult.dataOrNull ?? 1000;
         await nativeService.startLiveSpeedService(intervalMs: intervalMs);
       }
-    } catch (_) {}
+    } catch (e, stackTrace) {
+      debugPrint('Error restoring LiveSpeedService: $e\n$stackTrace');
+    }
   }
 
   void _setDestination(int index) {

@@ -175,16 +175,17 @@ object SpeedNotificationHelper {
             builder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         }
 
-        // 6. Status Bar Icon: Dynamic numeric icon vs static vector icon
+        // 6. Status Bar Small Icon & Dynamic Large Icon
+        // Small icon MUST be a static drawable resource (TYPE_RESOURCE) for Android & Samsung One UI status bar compatibility.
+        builder.setSmallIcon(R.drawable.ic_stat_speed)
+
         if (useDynamicIcon) {
             try {
-                val icon = SpeedIconGenerator.getDynamicSpeedIcon(totalBps, useBits)
-                builder.setSmallIcon(icon)
+                val speedBitmap = SpeedIconGenerator.getSpeedBitmap(totalBps, useBits)
+                builder.setLargeIcon(speedBitmap)
             } catch (_: Exception) {
-                builder.setSmallIcon(R.drawable.ic_stat_speed)
+                // Fallback gracefully without large icon
             }
-        } else {
-            builder.setSmallIcon(R.drawable.ic_stat_speed)
         }
 
         if (!carrierName.isNullOrEmpty()) {

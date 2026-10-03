@@ -105,12 +105,6 @@ class LiveSpeedService : Service() {
                     initialNotification,
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE
                 )
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(
-                    SpeedNotificationHelper.NOTIFICATION_ID,
-                    initialNotification,
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE
-                )
             } else {
                 startForeground(SpeedNotificationHelper.NOTIFICATION_ID, initialNotification)
             }
