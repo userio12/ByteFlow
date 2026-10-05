@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_icons.dart';
-import '../../../../core/utils/byte_formatter.dart';
 
-/// Interactive live simulation of ByteFlow's Android notification speed meter.
-/// Allows users to preview Collapsed vs Expanded layouts in real time with active unit preferences.
+/// Authentic Samsung One UI (One UI 4–5 / Android 12) Live Notification Preview.
+/// Matches the reference screenshots of "Internet Speed Meter Lite" on Samsung Galaxy.
 class NotificationPreviewCard extends StatefulWidget {
   final bool useBits;
   final bool isStatusBarSpeedIcon;
@@ -23,25 +21,20 @@ class NotificationPreviewCard extends StatefulWidget {
 
 class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
   bool _isExpanded = false;
+  bool _showShadeContext = false;
 
-  // Sample preview throughput rates (14.8 MB/s download, 2.1 MB/s upload)
-  static const int _sampleDlBps = 15518924; // ~14.8 MB/s
-  static const int _sampleUlBps = 2202009;  // ~2.1 MB/s
+  // Colors matching Samsung One UI dark mode notification shade
+  static const Color _oneUiNotifBg = Color(0xFF2A2A2A);
+  static const Color _oneUiTextPrimary = Color(0xFFFFFFFF);
+  static const Color _oneUiTextSecondary = Color(0xFFB0B0B0);
+  static const Color _oneUiChevron = Color(0xFF8E8E93);
+  static const Color _oneUiBlue = Color(0xFF2C75FF);
+  static const Color _oneUiInactiveToggle = Color(0xFF3A3A3C);
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-
-    final dlFormatted = ByteFormatter.formatSpeed(
-      _sampleDlBps,
-      useBits: widget.useBits,
-    );
-    final ulFormatted = ByteFormatter.formatSpeed(
-      _sampleUlBps,
-      useBits: widget.useBits,
-    );
-    final statusIconText = widget.useBits ? '118m' : '14M';
 
     return Card(
       elevation: 0,
@@ -57,7 +50,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Preview Header with Layout Toggle
+            // Preview Header with Layout Toggle & Shade Mode
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -103,73 +96,80 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
-            // Simulated Android System Status Bar Strip
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.8),
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
-              ),
-              child: Row(
-                children: [
-                  Text(
-                    '10:09',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: Colors.white70,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  if (widget.isStatusBarSpeedIcon)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF06B6D4).withValues(alpha: 0.25),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(color: const Color(0xFF06B6D4), width: 0.8),
-                      ),
-                      child: Text(
-                        statusIconText,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF06B6D4),
-                          fontFamily: 'monospace',
+            // Toggle for Shade Context
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                InkWell(
+                  key: const ValueKey('shade_context_toggle'),
+                  onTap: () {
+                    setState(() {
+                      _showShadeContext = !_showShadeContext;
+                    });
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          _showShadeContext ? Icons.visibility : Icons.visibility_outlined,
+                          size: 16,
+                          color: _showShadeContext ? colorScheme.primary : colorScheme.onSurfaceVariant,
                         ),
-                      ),
-                    )
-                  else
-                    const Icon(Icons.speed, size: 14, color: Colors.white70),
-                  const Spacer(),
-                  const Icon(Icons.wifi, size: 14, color: Colors.white70),
-                  const SizedBox(width: 4),
-                  const Icon(Icons.signal_cellular_alt, size: 14, color: Colors.white70),
-                  const SizedBox(width: 4),
-                  Text(
-                    '92%',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: Colors.white70,
-                      fontSize: 10,
+                        const SizedBox(width: 6),
+                        Text(
+                          'One UI Shade View',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: _showShadeContext ? colorScheme.primary : colorScheme.onSurfaceVariant,
+                            fontWeight: _showShadeContext ? FontWeight.bold : FontWeight.normal,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(width: 2),
-                  const Icon(Icons.battery_full, size: 14, color: Colors.white70),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+
+            // Notification Canvas
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: Colors.white12),
+              ),
+              child: Column(
+                children: [
+                  // System Status Bar Strip
+                  _buildStatusBarStrip(),
+
+                  if (_showShadeContext) ...[
+                    // One UI Quick Settings Panel
+                    _buildQuickSettingsPanel(),
+                  ],
+
+                  // Notification Shade Card Container
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 200),
+                      child: _isExpanded
+                          ? _buildExpandedCard()
+                          : _buildCollapsedCard(),
+                    ),
+                  ),
+
+                  if (_showShadeContext) ...[
+                    // Bottom actions: Notification settings & Clear
+                    _buildShadeFooter(),
+                  ],
                 ],
               ),
-            ),
-
-            // Simulated Notification Body
-            AnimatedSwitcher(
-              duration: const Duration(milliseconds: 250),
-              transitionBuilder: (child, animation) => FadeTransition(
-                opacity: animation,
-                child: child,
-              ),
-              child: _isExpanded
-                  ? _buildExpandedPreview(context, dlFormatted, ulFormatted)
-                  : _buildCollapsedPreview(context, dlFormatted, ulFormatted),
             ),
           ],
         ),
@@ -177,323 +177,360 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
     );
   }
 
-  Widget _buildCollapsedPreview(
-    BuildContext context,
-    String dlSpeed,
-    String ulSpeed,
-  ) {
+  /// System Status Bar replicating Samsung One UI 4-5
+  Widget _buildStatusBarStrip() {
+    final statusDlSpeed = widget.useBits ? '184' : (_isExpanded ? '28' : '23');
+    final statusUnit = widget.useBits ? 'Kbps' : 'KB/s';
+
     return Container(
-      key: const ValueKey('collapsed_preview'),
-      padding: const EdgeInsets.all(12.0),
+      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 6.0),
       decoration: const BoxDecoration(
-        color: Color(0xFF1A1C20),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(14)),
+        color: Colors.black,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       child: Row(
         children: [
-          // Download Pill
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2D313A),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  '↓ ',
-                  style: TextStyle(
-                    color: Color(0xFF06B6D4),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-                Text(
-                  dlSpeed,
-                  style: const TextStyle(
-                    color: Color(0xFFF1F3F9),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-              ],
+          const Text(
+            '10:14',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(width: 8),
-
-          // Upload Pill
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: const Color(0xFF2D313A),
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: Row(
+          if (widget.isStatusBarSpeedIcon)
+            Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text(
-                  '↑ ',
-                  style: TextStyle(
-                    color: Color(0xFFEC4899),
+                Text(
+                  statusDlSpeed,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 9,
                     fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                    height: 1.0,
                   ),
                 ),
                 Text(
-                  ulSpeed,
+                  statusUnit,
                   style: const TextStyle(
-                    color: Color(0xFFF1F3F9),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                    fontFamily: 'monospace',
+                    color: _oneUiTextSecondary,
+                    fontSize: 7,
+                    fontWeight: FontWeight.normal,
+                    height: 1.0,
                   ),
                 ),
               ],
-            ),
-          ),
+            )
+          else
+            const Icon(Icons.speed, size: 14, color: Colors.white70),
           const Spacer(),
-
-          // Today's Total
           const Text(
-            'Today: 1.65 GB',
-            style: TextStyle(
-              color: Color(0xFF9DA3AE),
-              fontSize: 11,
-            ),
+            'Vo) LTE1',
+            style: TextStyle(color: Colors.white70, fontSize: 8, fontWeight: FontWeight.bold),
           ),
+          const SizedBox(width: 4),
+          const Icon(Icons.signal_cellular_alt, size: 12, color: Colors.white70),
+          const SizedBox(width: 4),
+          const Text(
+            '91%',
+            style: TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(width: 2),
+          const Icon(Icons.battery_full, size: 12, color: Colors.white),
         ],
       ),
     );
   }
 
-  Widget _buildExpandedPreview(
-    BuildContext context,
-    String dlSpeed,
-    String ulSpeed,
-  ) {
+  /// Collapsed Samsung One UI notification card (No app title)
+  Widget _buildCollapsedCard() {
+    final dlVal = widget.useBits ? '184' : '23';
+    final dlUnit = widget.useBits ? 'Kbps' : 'KB/s';
+    final lineSpeeds = widget.useBits
+        ? 'Down: 184 Kbps   Up: 3.5 Kbps'
+        : 'Down: 23 KB/s   Up: 438 B/s';
+    final lineTraffic = 'Mobile: 393.5 MB   WiFi: 533 MB';
+
     return Container(
-      key: const ValueKey('expanded_preview'),
-      padding: const EdgeInsets.all(12.0),
-      decoration: const BoxDecoration(
-        color: Color(0xFF1A1C20),
-        borderRadius: BorderRadius.vertical(bottom: Radius.circular(14)),
+      key: const ValueKey('collapsed_card'),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: _oneUiNotifBg,
+        borderRadius: BorderRadius.circular(26),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          // Header
-          Row(
-            children: [
-              const Text(
-                'ByteFlow • Speed Monitor',
-                style: TextStyle(
-                  color: Color(0xFFF1F3F9),
-                  fontWeight: FontWeight.bold,
-                  fontSize: 12,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Text(
-                  '● Live',
-                  style: TextStyle(
-                    color: Color(0xFF10B981),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-              const Spacer(),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF2D313A),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text(
-                  'Wi-Fi 5G',
-                  style: TextStyle(
-                    color: Color(0xFFF1F3F9),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          // Dual Metric Tiles
-          Row(
-            children: [
-              // Download Card
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF23262D),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF353942)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Text('↓ ', style: TextStyle(color: Color(0xFF06B6D4), fontWeight: FontWeight.bold, fontSize: 11)),
-                          Text('DOWNLOAD', style: TextStyle(color: Color(0xFF9DA3AE), fontSize: 9, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        dlSpeed,
-                        style: const TextStyle(
-                          color: Color(0xFFF1F3F9),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(2),
-                        child: const LinearProgressIndicator(
-                          value: 0.65,
-                          minHeight: 3,
-                          backgroundColor: Color(0xFF2B2E36),
-                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF06B6D4)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-
-              // Upload Card
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF23262D),
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(color: const Color(0xFF353942)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Row(
-                        children: [
-                          Text('↑ ', style: TextStyle(color: Color(0xFFEC4899), fontWeight: FontWeight.bold, fontSize: 11)),
-                          Text('UPLOAD', style: TextStyle(color: Color(0xFF9DA3AE), fontSize: 9, fontWeight: FontWeight.bold)),
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        ulSpeed,
-                        style: const TextStyle(
-                          color: Color(0xFFF1F3F9),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 15,
-                          fontFamily: 'monospace',
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(2),
-                        child: const LinearProgressIndicator(
-                          value: 0.25,
-                          minHeight: 3,
-                          backgroundColor: Color(0xFF2B2E36),
-                          valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFEC4899)),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-
-          // Today's Usage Breakdown
-          Container(
-            padding: const EdgeInsets.all(8.0),
-            decoration: BoxDecoration(
-              color: const Color(0xFF23262D),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF353942)),
-            ),
+          // Left speed indicator: Numeric value on top, unit underneath
+          SizedBox(
+            width: 44,
             child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  dlVal,
+                  style: const TextStyle(
+                    color: _oneUiTextPrimary,
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    height: 1.1,
+                  ),
+                ),
+                Text(
+                  dlUnit,
+                  style: const TextStyle(
+                    color: _oneUiTextSecondary,
+                    fontSize: 9.5,
+                    height: 1.1,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 14),
+
+          // Main text lines
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Today's Usage", style: TextStyle(color: Color(0xFF9DA3AE), fontSize: 10, fontWeight: FontWeight.bold)),
-                    Text("60%", style: TextStyle(color: Color(0xFFF1F3F9), fontSize: 10, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(2),
-                  child: const LinearProgressIndicator(
-                    value: 0.60,
-                    minHeight: 3,
-                    backgroundColor: Color(0xFF2B2E36),
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.cellular),
+                Text(
+                  lineSpeeds,
+                  style: const TextStyle(
+                    color: _oneUiTextPrimary,
+                    fontSize: 13.5,
+                    height: 1.2,
                   ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Cell: 1.2 GB / 2.0 GB • Wi-Fi: 450 MB',
-                  style: TextStyle(color: Color(0xFF9DA3AE), fontSize: 9),
+                const SizedBox(height: 3),
+                Text(
+                  lineTraffic,
+                  style: const TextStyle(
+                    color: _oneUiTextSecondary,
+                    fontSize: 12,
+                    height: 1.2,
+                  ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 10),
 
-          // Quick Action Buttons Row
-          Row(
-            children: [
-              _buildActionButton('⚡ Dashboard'),
-              const SizedBox(width: 6),
-              _buildActionButton('📊 Plan'),
-              const SizedBox(width: 6),
-              _buildActionButton('⏸ Pause'),
-            ],
+          // Subtle downward chevron
+          const Icon(
+            Icons.keyboard_arrow_down,
+            color: _oneUiChevron,
+            size: 18,
           ),
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(String label) {
-    return Expanded(
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 6),
-        decoration: BoxDecoration(
-          color: const Color(0xFF2D313A),
-          borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFF353942)),
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: Color(0xFFF1F3F9),
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
+  /// Expanded Samsung One UI notification card (With app identity header)
+  Widget _buildExpandedCard() {
+    final dlVal = widget.useBits ? '224' : '28';
+    final dlUnit = widget.useBits ? 'Kbps' : 'KB/s';
+    final lineSpeeds = widget.useBits
+        ? 'Down: 224 Kbps   Up: 768 bps'
+        : 'Down: 28 KB/s   Up: 96 B/s';
+    final lineTraffic = 'Mobile: 393.7 MB   WiFi: 533 MB';
+
+    return Container(
+      key: const ValueKey('expanded_card'),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        color: _oneUiNotifBg,
+        borderRadius: BorderRadius.circular(26),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Left speed indicator: Numeric value on top, unit underneath
+          Padding(
+            padding: const EdgeInsets.only(top: 2.0),
+            child: SizedBox(
+              width: 44,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    dlVal,
+                    style: const TextStyle(
+                      color: _oneUiTextPrimary,
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      height: 1.1,
+                    ),
+                  ),
+                  Text(
+                    dlUnit,
+                    style: const TextStyle(
+                      color: _oneUiTextSecondary,
+                      fontSize: 9.5,
+                      height: 1.1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
+          const SizedBox(width: 14),
+
+          // Main content: App title, speeds, traffic stats
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Header: App Name
+                const Text(
+                  'Internet Speed Meter Lite',
+                  style: TextStyle(
+                    color: _oneUiTextPrimary,
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.w600,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Line 2: Speeds
+                Text(
+                  lineSpeeds,
+                  style: const TextStyle(
+                    color: _oneUiTextPrimary,
+                    fontSize: 13.5,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                // Line 3: Traffic Stats
+                Text(
+                  lineTraffic,
+                  style: const TextStyle(
+                    color: _oneUiTextSecondary,
+                    fontSize: 12,
+                    height: 1.2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Subtle upward chevron
+          const Padding(
+            padding: EdgeInsets.only(top: 2.0),
+            child: Icon(
+              Icons.keyboard_arrow_up,
+              color: _oneUiChevron,
+              size: 18,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Samsung One UI Quick Settings Panel
+  Widget _buildQuickSettingsPanel() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: Column(
+        children: [
+          // Date & Settings Row
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Sun, 4 Oct',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Icon(Icons.settings, color: Colors.white70, size: 20),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Quick Toggle Circles
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildToggleCircle(Icons.wifi, false),
+              _buildToggleCircle(Icons.volume_up, true),
+              _buildToggleCircle(Icons.bluetooth, false),
+              _buildToggleCircle(Icons.swap_vert, true),
+              _buildToggleCircle(Icons.screen_lock_portrait, false),
+              _buildToggleCircle(Icons.airplanemode_active, false),
+            ],
+          ),
+          const SizedBox(height: 14),
+
+          // Brightness Slider Mockup
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: const Color(0xFF3A3A3C),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.wb_sunny_outlined, color: Colors.white70, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(4),
+                    child: const LinearProgressIndicator(
+                      value: 0.5,
+                      minHeight: 4,
+                      backgroundColor: Colors.white24,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.more_vert, color: Colors.white70, size: 16),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildToggleCircle(IconData icon, bool isActive) {
+    return Container(
+      width: 44,
+      height: 44,
+      decoration: BoxDecoration(
+        color: isActive ? _oneUiBlue : _oneUiInactiveToggle,
+        shape: BoxShape.circle,
+      ),
+      child: Icon(icon, color: Colors.white, size: 20),
+    );
+  }
+
+  Widget _buildShadeFooter() {
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            'Notification settings',
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+          Text(
+            'Clear',
+            style: TextStyle(color: Colors.white70, fontSize: 12),
+          ),
+        ],
       ),
     );
   }

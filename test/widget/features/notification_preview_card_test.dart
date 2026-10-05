@@ -11,16 +11,18 @@ void main() {
     }) {
       return MaterialApp(
         home: Scaffold(
-          body: NotificationPreviewCard(
-            useBits: useBits,
-            isStatusBarSpeedIcon: isStatusBarSpeedIcon,
-            isLiveSpeedEnabled: isLiveSpeedEnabled,
+          body: SingleChildScrollView(
+            child: NotificationPreviewCard(
+              useBits: useBits,
+              isStatusBarSpeedIcon: isStatusBarSpeedIcon,
+              isLiveSpeedEnabled: isLiveSpeedEnabled,
+            ),
           ),
         ),
       );
     }
 
-    testWidgets('renders initial collapsed preview with speed pills and status bar', (tester) async {
+    testWidgets('renders initial collapsed Samsung One UI preview without app title', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -29,18 +31,23 @@ void main() {
       expect(find.text('Expanded'), findsOneWidget);
 
       // Status bar simulation
-      expect(find.text('10:09'), findsOneWidget);
-      expect(find.text('14M'), findsOneWidget); // Dynamic status bar speed icon
+      expect(find.text('10:14'), findsOneWidget);
+      expect(find.text('91%'), findsOneWidget);
 
-      // Collapsed view pills
-      expect(find.text('↓ '), findsOneWidget);
-      expect(find.text('↑ '), findsOneWidget);
-      expect(find.text('14.8 MB/s'), findsOneWidget);
-      expect(find.text('2.1 MB/s'), findsOneWidget);
-      expect(find.text('Today: 1.65 GB'), findsOneWidget);
+      // Speed indicator: 23 KB/s (numeric on top, unit underneath)
+      expect(find.text('23'), findsWidgets);
+      expect(find.text('KB/s'), findsWidgets);
+
+      // Collapsed view text lines
+      expect(find.text('Down: 23 KB/s   Up: 438 B/s'), findsOneWidget);
+      expect(find.text('Mobile: 393.5 MB   WiFi: 533 MB'), findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+
+      // Crucial: App title must NOT be in collapsed view
+      expect(find.text('Internet Speed Meter Lite'), findsNothing);
     });
 
-    testWidgets('switches to expanded view when tapping Expanded segmented button', (tester) async {
+    testWidgets('switches to expanded view with app identity header and upward chevron', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -48,34 +55,46 @@ void main() {
       await tester.tap(find.text('Expanded'));
       await tester.pumpAndSettle();
 
-      expect(find.text('ByteFlow • Speed Monitor'), findsOneWidget);
-      expect(find.text('● Live'), findsOneWidget);
-      expect(find.text('Wi-Fi 5G'), findsOneWidget);
-      expect(find.text('DOWNLOAD'), findsOneWidget);
-      expect(find.text('UPLOAD'), findsOneWidget);
-      expect(find.text("Today's Usage"), findsOneWidget);
-      expect(find.text('60%'), findsOneWidget);
+      // App identity header is now visible
+      expect(find.text('Internet Speed Meter Lite'), findsOneWidget);
+      expect(find.text('Down: 28 KB/s   Up: 96 B/s'), findsOneWidget);
+      expect(find.text('Mobile: 393.7 MB   WiFi: 533 MB'), findsOneWidget);
+      expect(find.byIcon(Icons.keyboard_arrow_up), findsOneWidget);
 
-      // Action buttons
-      expect(find.text('⚡ Dashboard'), findsOneWidget);
-      expect(find.text('📊 Plan'), findsOneWidget);
-      expect(find.text('⏸ Pause'), findsOneWidget);
+      // Obsolete buttons should not exist
+      expect(find.text('⚡ Dashboard'), findsNothing);
+      expect(find.text('⏸ Pause'), findsNothing);
     });
 
     testWidgets('renders bits formatting when useBits is true', (tester) async {
       await tester.pumpWidget(buildSubject(useBits: true));
       await tester.pumpAndSettle();
 
-      expect(find.text('118m'), findsOneWidget); // Status bar bits
-      expect(find.text('124.2 Mb/s'), findsOneWidget); // Download bits
+      expect(find.text('184'), findsWidgets);
+      expect(find.text('Kbps'), findsWidgets);
+      expect(find.text('Down: 184 Kbps   Up: 3.5 Kbps'), findsOneWidget);
     });
 
     testWidgets('renders static icon when isStatusBarSpeedIcon is false', (tester) async {
       await tester.pumpWidget(buildSubject(isStatusBarSpeedIcon: false));
       await tester.pumpAndSettle();
 
-      expect(find.text('14M'), findsNothing);
       expect(find.byIcon(Icons.speed), findsOneWidget);
+    });
+
+    testWidgets('toggles One UI notification shade context with quick settings', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sun, 4 Oct'), findsNothing);
+
+      // Tap shade context toggle
+      await tester.tap(find.byKey(const ValueKey('shade_context_toggle')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sun, 4 Oct'), findsOneWidget);
+      expect(find.text('Notification settings'), findsOneWidget);
+      expect(find.text('Clear'), findsOneWidget);
     });
   });
 }

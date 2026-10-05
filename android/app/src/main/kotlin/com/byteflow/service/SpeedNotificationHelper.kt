@@ -73,101 +73,40 @@ object SpeedNotificationHelper {
         }
         val pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, piFlags)
 
-        // 2. Formatted Speed Strings
+        // 2. Formatted Speed and Traffic Strings
         val dlSpeedStr = formatSpeed(downloadBps, useBits)
         val ulSpeedStr = formatSpeed(uploadBps, useBits)
-        val speedTitle = "↓ $dlSpeedStr   ↑ $ulSpeedStr"
-        val todayStr = "Today: ${formatBytes(todayMobileBytes)} Cell • ${formatBytes(todayWifiBytes)} Wi-Fi"
+        val (dlVal, dlUnit) = splitSpeed(downloadBps, useBits)
+        val speedsLine = "Down: $dlSpeedStr   Up: $ulSpeedStr"
+        val trafficLine = "Mobile: ${formatBytes(todayMobileBytes)}   WiFi: ${formatBytes(todayWifiBytes)}"
 
-        // 3. Collapsed RemoteViews (64dp)
+        // 3. Collapsed RemoteViews (Samsung One UI compact card)
         val viewsCollapsed = RemoteViews(context.packageName, R.layout.notification_speed_collapsed).apply {
-            setTextViewText(R.id.notif_collapsed_download, dlSpeedStr)
-            setTextViewText(R.id.notif_collapsed_upload, ulSpeedStr)
-            setTextViewText(R.id.notif_collapsed_today, "Today: ${formatBytes(todayMobileBytes + todayWifiBytes)}")
+            setTextViewText(R.id.notif_speed_val, dlVal)
+            setTextViewText(R.id.notif_speed_unit, dlUnit)
+            setTextViewText(R.id.notif_line_speeds, speedsLine)
+            setTextViewText(R.id.notif_line_traffic, trafficLine)
         }
 
-        // 4. Expanded RemoteViews (Material 3 Card)
+        // 4. Expanded RemoteViews (Samsung One UI expanded card with header)
         val viewsExpanded = RemoteViews(context.packageName, R.layout.notification_speed_expanded).apply {
-            // Header
-            setTextViewText(R.id.notif_live_status, if (isPaused) "● Paused" else "● Live")
-            val statusColor = if (isPaused) {
-                ContextCompat.getColor(context, R.color.notif_text_secondary)
-            } else {
-                ContextCompat.getColor(context, R.color.notif_accent_green)
-            }
-            setTextColor(R.id.notif_live_status, statusColor)
-
-            val badgeText = if (!carrierName.isNullOrEmpty()) carrierName else networkType
-            setTextViewText(R.id.notif_network_badge, badgeText)
-
-            // Speeds
-            setTextViewText(R.id.notif_expanded_download, dlSpeedStr)
-            setTextViewText(R.id.notif_expanded_upload, ulSpeedStr)
-
-            // Mini throughput activity indicators (dynamic curve up to 50 MB/s for responsive visual feedback)
-            val dlPercent = calculateThroughputPercent(downloadBps)
-            val ulPercent = calculateThroughputPercent(uploadBps)
-            setProgressBar(R.id.notif_download_bar, 100, dlPercent, false)
-            setProgressBar(R.id.notif_upload_bar, 100, ulPercent, false)
-
-            // Today's Usage Breakdown
-            if (quotaBytes > 0) {
-                val percent = ((todayMobileBytes.toDouble() / quotaBytes.toDouble()) * 100).toInt().coerceIn(0, 100)
-                setTextViewText(R.id.notif_quota_percent, "$percent%")
-                setProgressBar(R.id.notif_quota_bar, 100, percent, false)
-                setTextViewText(
-                    R.id.notif_today_details,
-                    "Cell: ${formatBytes(todayMobileBytes)} / ${formatBytes(quotaBytes)} • Wi-Fi: ${formatBytes(todayWifiBytes)}"
-                )
-            } else {
-                setTextViewText(R.id.notif_quota_percent, "Active")
-                setProgressBar(R.id.notif_quota_bar, 100, 0, false)
-                setTextViewText(
-                    R.id.notif_today_details,
-                    "Cell: ${formatBytes(todayMobileBytes)} • Wi-Fi: ${formatBytes(todayWifiBytes)}"
-                )
-            }
-
-            // Quick Action 1: Open Dashboard
-            val dashboardIntent = Intent(context, MainActivity::class.java).apply {
-                this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("route", "dashboard")
-            }
-            val piDashboard = PendingIntent.getActivity(context, 101, dashboardIntent, piFlags)
-            setOnClickPendingIntent(R.id.notif_btn_dashboard, piDashboard)
-
-            // Quick Action 2: Open Data Plan
-            val planIntent = Intent(context, MainActivity::class.java).apply {
-                this.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                putExtra("route", "plan")
-            }
-            val piPlan = PendingIntent.getActivity(context, 102, planIntent, piFlags)
-            setOnClickPendingIntent(R.id.notif_btn_plan, piPlan)
-
-            // Quick Action 3: Pause / Resume sampling
-            // Using separate request codes (103 for pause, 104 for resume) ensures FLAG_IMMUTABLE
-            // does not prevent the intent action from switching properly.
-            val actionIntent = Intent(context, SpeedActionReceiver::class.java).apply {
-                action = if (isPaused) SpeedActionReceiver.ACTION_RESUME_SPEED else SpeedActionReceiver.ACTION_PAUSE_SPEED
-            }
-            val actionRequestCode = if (isPaused) 104 else 103
-            val piAction = PendingIntent.getBroadcast(context, actionRequestCode, actionIntent, piFlags)
-            setTextViewText(R.id.notif_btn_pause, if (isPaused) "▶ Resume" else "⏸ Pause")
-            setOnClickPendingIntent(R.id.notif_btn_pause, piAction)
+            setTextViewText(R.id.notif_expanded_speed_val, dlVal)
+            setTextViewText(R.id.notif_expanded_speed_unit, dlUnit)
+            setTextViewText(R.id.notif_expanded_line_speeds, speedsLine)
+            setTextViewText(R.id.notif_expanded_line_traffic, trafficLine)
         }
 
         // 5. Construct NotificationCompat.Builder
+        // Omit DecoratedCustomViewStyle to prevent Android 12+ SystemUI from injecting a decorated header row in collapsed view
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setContentTitle(speedTitle)
-            .setContentText(todayStr)
+            .setSmallIcon(R.drawable.ic_stat_speed)
+            .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setContentIntent(pendingIntent)
             .setCategory(NotificationCompat.CATEGORY_STATUS)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setShowWhen(false)
-            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
             .setCustomContentView(viewsCollapsed)
             .setCustomBigContentView(viewsExpanded)
 
@@ -175,24 +114,33 @@ object SpeedNotificationHelper {
             builder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
         }
 
-        // 6. Status Bar Small Icon & Dynamic Large Icon
-        // Small icon MUST be a static drawable resource (TYPE_RESOURCE) for Android & Samsung One UI status bar compatibility.
-        builder.setSmallIcon(R.drawable.ic_stat_speed)
+        return builder.build()
+    }
 
-        if (useDynamicIcon) {
-            try {
-                val speedBitmap = SpeedIconGenerator.getSpeedBitmap(totalBps, useBits)
-                builder.setLargeIcon(speedBitmap)
-            } catch (_: Exception) {
-                // Fallback gracefully without large icon
+    /**
+     * Splits [bytesPerSec] into a (numeric value, unit) pair for the left indicator.
+     */
+    fun splitSpeed(bytesPerSec: Long, useBits: Boolean = false): Pair<String, String> {
+        if (bytesPerSec <= 0) {
+            return Pair("0", if (useBits) "bps" else "B/s")
+        }
+
+        return if (useBits) {
+            val bits = (bytesPerSec * 8).toDouble()
+            when {
+                bits >= 1_000_000_000.0 -> Pair(String.format("%.1f", bits / 1_000_000_000.0), "Gbps")
+                bits >= 1_000_000.0 -> Pair(String.format("%.1f", bits / 1_000_000.0), "Mbps")
+                bits >= 1_000.0 -> Pair(String.format("%d", (bits / 1_000.0).toLong()), "Kbps")
+                else -> Pair(bits.toLong().toString(), "bps")
+            }
+        } else {
+            when {
+                bytesPerSec >= 1024L * 1024 * 1024 -> Pair(String.format("%.2f", bytesPerSec / (1024.0 * 1024 * 1024)), "GB/s")
+                bytesPerSec >= 1024L * 1024 -> Pair(String.format("%.1f", bytesPerSec / (1024.0 * 1024)), "MB/s")
+                bytesPerSec >= 1024L -> Pair(String.format("%d", bytesPerSec / 1024), "KB/s")
+                else -> Pair(bytesPerSec.toString(), "B/s")
             }
         }
-
-        if (!carrierName.isNullOrEmpty()) {
-            builder.setSubText(carrierName)
-        }
-
-        return builder.build()
     }
 
     /**

@@ -5,89 +5,83 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingStart="12dp"
-    android:paddingEnd="12dp"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    android:background="@color/notif_surface">
+    android:background="@drawable/notification_card_background"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
 
-    <!-- Download Speed Block -->
+    <!-- Speed Indicator (Numeric Speed on top, Unit below) -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/notif_speed_indicator"
+        android:layout_width="44dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/notification_badge_background"
-        android:paddingStart="8dp"
-        android:paddingEnd="10dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp">
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="center_vertical">
 
         <TextView
+            android:id="@+id/notif_speed_val"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="↓ "
-            android:textColor="@color/notif_download"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/notif_collapsed_download"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0 B/s"
-            android:textColor="@color/notif_text_primary"
-            android:textSize="12sp"
+            android:text="0"
+            android:textColor="@color/oneui_text_primary"
+            android:textSize="17sp"
             android:textStyle="bold"
-            android:fontFamily="sans-serif-medium" />
+            android:includeFontPadding="false"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/notif_speed_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KB/s"
+            android:textColor="@color/oneui_text_secondary"
+            android:textSize="9.5sp"
+            android:includeFontPadding="false"
+            android:gravity="center" />
     </LinearLayout>
 
-    <!-- Upload Speed Block -->
+    <!-- Main Content: Speeds and Traffic Stats -->
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:background="@drawable/notification_badge_background"
-        android:paddingStart="8dp"
-        android:paddingEnd="10dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="↑ "
-            android:textColor="@color/notif_upload"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/notif_collapsed_upload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="0 B/s"
-            android:textColor="@color/notif_text_primary"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:fontFamily="sans-serif-medium" />
-    </LinearLayout>
-
-    <!-- Legal Spacer in RemoteViews -->
-    <FrameLayout
         android:layout_width="0dp"
-        android:layout_height="1dp"
-        android:layout_weight="1" />
-
-    <!-- Today's Total Pill -->
-    <TextView
-        android:id="@+id/notif_collapsed_today"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Today: 0 B"
-        android:textColor="@color/notif_text_secondary"
-        android:textSize="11sp"
-        android:singleLine="true" />
+        android:layout_weight="1"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:id="@+id/notif_line_speeds"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Down: 0 KB/s   Up: 0 B/s"
+            android:textColor="@color/oneui_text_primary"
+            android:textSize="13.5sp"
+            android:includeFontPadding="false"
+            android:singleLine="true" />
+
+        <TextView
+            android:id="@+id/notif_line_traffic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Mobile: 0 B   WiFi: 0 B"
+            android:textColor="@color/oneui_text_secondary"
+            android:textSize="12sp"
+            android:includeFontPadding="false"
+            android:singleLine="true" />
+    </LinearLayout>
+
+    <!-- Subtle Samsung-Style Expand Chevron -->
+    <ImageView
+        android:id="@+id/notif_chevron"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_gravity="center_vertical"
+        android:src="@drawable/ic_notif_chevron_down"
+        android:tint="@color/oneui_chevron"
+        android:contentDescription="Expand" />
 
 </LinearLayout>

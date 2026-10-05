@@ -10,4 +10,5 @@
     <string name="widget_quota_default">No Plan Active</string>
     <string name="speed_channel_name">Live Network Speed</string>
     <string name="speed_channel_desc">Shows ongoing real-time download and upload throughput in the status bar.</string>
+    <string name="speed_notification_title">Internet Speed Meter Lite</string>
 </resources>

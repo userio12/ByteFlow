@@ -3,285 +3,100 @@
     android:id="@+id/notif_expanded_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@color/notif_surface"
-    android:padding="14dp">
+    android:orientation="horizontal"
+    android:background="@drawable/notification_card_background"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="12dp"
+    android:paddingBottom="12dp">
 
-    <!-- Top Header: Title, Live Status, and Network Interface Badge -->
+    <!-- Speed Indicator (Numeric Speed on top, Unit below) -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/notif_expanded_speed_indicator"
+        android:layout_width="44dp"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ByteFlow • Speed Monitor"
-            android:textColor="@color/notif_text_primary"
-            android:textSize="13sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/notif_live_status"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:text="● Live"
-            android:textColor="@color/notif_accent_green"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <!-- Legal Spacer in RemoteViews -->
-        <FrameLayout
-            android:layout_width="0dp"
-            android:layout_height="1dp"
-            android:layout_weight="1" />
-
-        <!-- Network Interface Badge -->
-        <TextView
-            android:id="@+id/notif_network_badge"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/notification_badge_background"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:paddingTop="2dp"
-            android:paddingBottom="2dp"
-            android:text="Wi-Fi"
-            android:textColor="@color/notif_text_primary"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-    </LinearLayout>
-
-    <!-- Center Metric Cards (Download & Upload) -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal">
-
-        <!-- Download Card -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="5dp"
-            android:background="@drawable/notification_card_background"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="↓ "
-                    android:textColor="@color/notif_download"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="DOWNLOAD"
-                    android:textColor="@color/notif_text_secondary"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/notif_expanded_download"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="0 B/s"
-                android:textColor="@color/notif_text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium" />
-
-            <ProgressBar
-                android:id="@+id/notif_download_bar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:layout_marginTop="6dp"
-                android:max="100"
-                android:progress="0"
-                android:progressDrawable="@drawable/notification_meter_progress" />
-        </LinearLayout>
-
-        <!-- Upload Card -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="5dp"
-            android:background="@drawable/notification_card_background"
-            android:orientation="vertical"
-            android:padding="10dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="↑ "
-                    android:textColor="@color/notif_upload"
-                    android:textSize="13sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="UPLOAD"
-                    android:textColor="@color/notif_text_secondary"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/notif_expanded_upload"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
-                android:text="0 B/s"
-                android:textColor="@color/notif_text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium" />
-
-            <ProgressBar
-                android:id="@+id/notif_upload_bar"
-                style="?android:attr/progressBarStyleHorizontal"
-                android:layout_width="match_parent"
-                android:layout_height="4dp"
-                android:layout_marginTop="6dp"
-                android:max="100"
-                android:progress="0"
-                android:progressDrawable="@drawable/notification_upload_progress" />
-        </LinearLayout>
-    </LinearLayout>
-
-    <!-- Today's Consumption Section -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:background="@drawable/notification_card_background"
         android:orientation="vertical"
-        android:padding="10dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Today's Usage"
-                android:textColor="@color/notif_text_secondary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/notif_quota_percent"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0%"
-                android:textColor="@color/notif_text_primary"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <ProgressBar
-            android:id="@+id/notif_quota_bar"
-            style="?android:attr/progressBarStyleHorizontal"
-            android:layout_width="match_parent"
-            android:layout_height="4dp"
-            android:layout_marginTop="6dp"
-            android:max="100"
-            android:progress="0"
-            android:progressDrawable="@drawable/widget_progress_bar" />
+        android:gravity="center"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="2dp">
 
         <TextView
-            android:id="@+id/notif_today_details"
-            android:layout_width="match_parent"
+            android:id="@+id/notif_expanded_speed_val"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0"
+            android:textColor="@color/oneui_text_primary"
+            android:textSize="17sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false"
+            android:gravity="center" />
+
+        <TextView
+            android:id="@+id/notif_expanded_speed_unit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="KB/s"
+            android:textColor="@color/oneui_text_secondary"
+            android:textSize="9.5sp"
+            android:includeFontPadding="false"
+            android:gravity="center" />
+    </LinearLayout>
+
+    <!-- Main Content: Header App Title, Speeds, and Traffic Stats -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="14dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="vertical">
+
+        <!-- Top/Header: App Identity -->
+        <TextView
+            android:id="@+id/notif_expanded_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/speed_notification_title"
+            android:textColor="@color/oneui_text_primary"
+            android:textSize="13.5sp"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false"
+            android:singleLine="true" />
+
+        <!-- Speeds Row: Down: ... Up: ... -->
+        <TextView
+            android:id="@+id/notif_expanded_line_speeds"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="Cell: 0 B • Wi-Fi: 0 B"
-            android:textColor="@color/notif_text_secondary"
-            android:textSize="11sp"
+            android:text="Down: 0 KB/s   Up: 0 B/s"
+            android:textColor="@color/oneui_text_primary"
+            android:textSize="13.5sp"
+            android:includeFontPadding="false"
+            android:singleLine="true" />
+
+        <!-- Traffic Stats Row: Mobile: ... WiFi: ... -->
+        <TextView
+            android:id="@+id/notif_expanded_line_traffic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="3dp"
+            android:text="Mobile: 0 B   WiFi: 0 B"
+            android:textColor="@color/oneui_text_secondary"
+            android:textSize="12sp"
+            android:includeFontPadding="false"
             android:singleLine="true" />
     </LinearLayout>
 
-    <!-- Quick Action Buttons Row -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:orientation="horizontal"
-        android:gravity="center">
-
-        <!-- Dashboard Action -->
-        <TextView
-            android:id="@+id/notif_btn_dashboard"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="4dp"
-            android:background="@drawable/notification_action_background"
-            android:gravity="center"
-            android:paddingTop="7dp"
-            android:paddingBottom="7dp"
-            android:text="⚡ Dashboard"
-            android:textColor="@color/notif_text_primary"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <!-- Data Plan Action -->
-        <TextView
-            android:id="@+id/notif_btn_plan"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="2dp"
-            android:layout_marginEnd="2dp"
-            android:background="@drawable/notification_action_background"
-            android:gravity="center"
-            android:paddingTop="7dp"
-            android:paddingBottom="7dp"
-            android:text="📊 Plan"
-            android:textColor="@color/notif_text_primary"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <!-- Pause / Resume Action -->
-        <TextView
-            android:id="@+id/notif_btn_pause"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="4dp"
-            android:background="@drawable/notification_action_background"
-            android:gravity="center"
-            android:paddingTop="7dp"
-            android:paddingBottom="7dp"
-            android:text="⏸ Pause"
-            android:textColor="@color/notif_text_primary"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-    </LinearLayout>
+    <!-- Subtle Samsung-Style Collapse Chevron -->
+    <ImageView
+        android:id="@+id/notif_expanded_chevron"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
+        android:layout_gravity="top"
+        android:layout_marginTop="2dp"
+        android:src="@drawable/ic_notif_chevron_up"
+        android:tint="@color/oneui_chevron"
+        android:contentDescription="Collapse" />
 
 </LinearLayout>
