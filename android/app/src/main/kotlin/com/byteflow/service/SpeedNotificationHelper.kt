@@ -97,7 +97,7 @@ object SpeedNotificationHelper {
         }
 
         // 5. Construct NotificationCompat.Builder
-        // Omit DecoratedCustomViewStyle to prevent Android 12+ SystemUI from injecting a decorated header row in collapsed view
+        // Standalone notification: enforce null group and false group summary
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_speed)
             .setContentIntent(pendingIntent)
@@ -107,6 +107,8 @@ object SpeedNotificationHelper {
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setShowWhen(false)
+            .setGroup(null)
+            .setGroupSummary(false)
             .setCustomContentView(viewsCollapsed)
             .setCustomBigContentView(viewsExpanded)
 
