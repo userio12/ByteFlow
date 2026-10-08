@@ -44,12 +44,16 @@ void main() {
         matching: find.text('KB/s'),
       );
       final unitText = tester.widget<Text>(cardUnitFinder);
-      expect(unitText.style?.color, const Color(0xFF7CA8F8));
+      expect(unitText.style?.color, const Color(0xFF8AB4F8));
 
       // Collapsed view text lines
       expect(find.text('Down: 0 B/s   Up: 0 B/s'), findsOneWidget);
       expect(find.text('Mobile: 910.4 MB   WiFi: 0 MB'), findsOneWidget);
       expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+
+      // Bottom notification shade controls
+      expect(find.text('Notification settings'), findsOneWidget);
+      expect(find.text('Clear'), findsOneWidget);
 
       // Crucial: App title must NOT be in collapsed view
       expect(find.text('Internet Speed Meter Lite'), findsNothing);

@@ -27,9 +27,9 @@
     <color name="notif_action_bg">#2D313A</color>
     <color name="notif_meter_track">#2B2E36</color>
     <!-- Samsung One UI Notification Colors -->
-    <color name="oneui_notif_bg">#2A2A2A</color>
+    <color name="oneui_notif_bg">#2D2D2D</color>
     <color name="oneui_text_primary">#FFFFFF</color>
-    <color name="oneui_text_secondary">#B0B0B0</color>
+    <color name="oneui_text_secondary">#999999</color>
     <color name="oneui_chevron">#8E8E93</color>
-    <color name="oneui_unit_blue">#7CA8F8</color>
+    <color name="oneui_unit_blue">#8AB4F8</color>
 </resources>

@@ -6,15 +6,15 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@android:color/transparent"
-    android:paddingStart="12dp"
+    android:paddingStart="14dp"
     android:paddingEnd="14dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:paddingTop="10dp"
+    android:paddingBottom="10dp">
 
     <!-- Speed Indicator (Numeric Speed on top, Unit below) -->
     <LinearLayout
         android:id="@+id/notif_speed_indicator"
-        android:layout_width="44dp"
+        android:layout_width="40dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:gravity="center"
@@ -26,8 +26,7 @@
             android:layout_height="wrap_content"
             android:text="0"
             android:textColor="@color/oneui_text_primary"
-            android:textSize="17sp"
-            android:textStyle="bold"
+            android:textSize="18sp"
             android:includeFontPadding="false"
             android:gravity="center" />
 
@@ -37,7 +36,7 @@
             android:layout_height="wrap_content"
             android:text="KB/s"
             android:textColor="@color/oneui_unit_blue"
-            android:textSize="9.5sp"
+            android:textSize="9sp"
             android:includeFontPadding="false"
             android:gravity="center" />
     </LinearLayout>
@@ -47,7 +46,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="14dp"
+        android:layout_marginStart="10dp"
         android:layout_marginEnd="8dp"
         android:orientation="vertical"
         android:gravity="center_vertical">
@@ -58,7 +57,7 @@
             android:layout_height="wrap_content"
             android:text="Down: 0 B/s   Up: 0 B/s"
             android:textColor="@color/oneui_text_primary"
-            android:textSize="13.5sp"
+            android:textSize="13sp"
             android:includeFontPadding="false"
             android:singleLine="true" />
 
@@ -66,7 +65,7 @@
             android:id="@+id/notif_line_traffic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="3dp"
+            android:layout_marginTop="2dp"
             android:text="Mobile: 910.4 MB   WiFi: 0 MB"
             android:textColor="@color/oneui_text_secondary"
             android:textSize="12sp"
@@ -77,8 +76,8 @@
     <!-- Subtle Samsung-Style Expand Chevron -->
     <ImageView
         android:id="@+id/notif_chevron"
-        android:layout_width="14dp"
-        android:layout_height="14dp"
+        android:layout_width="16dp"
+        android:layout_height="16dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/ic_notif_chevron_down"
         android:tint="@color/oneui_chevron"

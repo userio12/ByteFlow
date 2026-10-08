@@ -24,13 +24,13 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
   bool _showShadeContext = false;
 
   // Colors matching Samsung One UI dark mode notification shade
-  static const Color _oneUiNotifBg = Color(0xFF2A2A2A);
+  static const Color _oneUiNotifBg = Color(0xFF2D2D2D);
   static const Color _oneUiTextPrimary = Color(0xFFFFFFFF);
-  static const Color _oneUiTextSecondary = Color(0xFFB0B0B0);
+  static const Color _oneUiTextSecondary = Color(0xFF999999);
   static const Color _oneUiChevron = Color(0xFF8E8E93);
   static const Color _oneUiBlue = Color(0xFF2C75FF);
   static const Color _oneUiInactiveToggle = Color(0xFF3A3A3C);
-  static const Color _oneUiUnitBlue = Color(0xFF7CA8F8);
+  static const Color _oneUiUnitBlue = Color(0xFF8AB4F8);
 
   @override
   Widget build(BuildContext context) {
@@ -156,7 +156,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
 
                   // Notification Shade Card Container
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
                     child: AnimatedSwitcher(
                       duration: const Duration(milliseconds: 200),
                       child: _isExpanded
@@ -165,10 +165,8 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                     ),
                   ),
 
-                  if (_showShadeContext) ...[
-                    // Bottom actions: Notification settings & Clear
-                    _buildShadeFooter(),
-                  ],
+                  // Bottom notification shade controls (always visible below the card)
+                  _buildShadeFooter(),
                 ],
               ),
             ),
@@ -258,24 +256,24 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
       color: Colors.transparent,
       child: InkWell(
         key: const ValueKey('collapsed_card'),
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(32),
         onTap: () {
           setState(() {
             _isExpanded = true;
           });
         },
         child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
           decoration: BoxDecoration(
             color: _oneUiNotifBg,
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(32),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               // Left speed indicator: Numeric value on top, unit underneath
               SizedBox(
-                width: 44,
+                width: 40,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -284,8 +282,8 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                       dlVal,
                       style: const TextStyle(
                         color: _oneUiTextPrimary,
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                        fontWeight: FontWeight.normal,
                         height: 1.1,
                       ),
                     ),
@@ -293,14 +291,14 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                       dlUnit,
                       style: const TextStyle(
                         color: _oneUiUnitBlue,
-                        fontSize: 9.5,
+                        fontSize: 9,
                         height: 1.1,
                       ),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 10),
 
               // Main text lines
               Expanded(
@@ -312,11 +310,11 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                       lineSpeeds,
                       style: const TextStyle(
                         color: _oneUiTextPrimary,
-                        fontSize: 13.5,
+                        fontSize: 13,
                         height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     Text(
                       lineTraffic,
                       style: const TextStyle(
@@ -355,17 +353,17 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
       color: Colors.transparent,
       child: InkWell(
         key: const ValueKey('expanded_card'),
-        borderRadius: BorderRadius.circular(26),
+        borderRadius: BorderRadius.circular(32),
         onTap: () {
           setState(() {
             _isExpanded = false;
           });
         },
         child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
           decoration: BoxDecoration(
             color: _oneUiNotifBg,
-            borderRadius: BorderRadius.circular(26),
+            borderRadius: BorderRadius.circular(32),
           ),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,7 +372,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
               Padding(
                 padding: const EdgeInsets.only(top: 1.0),
                 child: SizedBox(
-                  width: 44,
+                  width: 40,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.center,
@@ -383,8 +381,8 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                         dlVal,
                         style: const TextStyle(
                           color: _oneUiTextPrimary,
-                          fontSize: 17,
-                          fontWeight: FontWeight.bold,
+                          fontSize: 18,
+                          fontWeight: FontWeight.normal,
                           height: 1.1,
                         ),
                       ),
@@ -392,7 +390,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                         dlUnit,
                         style: const TextStyle(
                           color: _oneUiUnitBlue,
-                          fontSize: 9.5,
+                          fontSize: 9,
                           height: 1.1,
                         ),
                       ),
@@ -400,7 +398,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                   ),
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: 10),
 
               // Main content: App title + chevron in row 1, speeds in row 2, traffic stats in row 3
               Expanded(
@@ -417,8 +415,8 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                           'Internet Speed Meter Lite',
                           style: TextStyle(
                             color: _oneUiTextPrimary,
-                            fontSize: 13.5,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                            fontWeight: FontWeight.normal,
                             height: 1.2,
                           ),
                         ),
@@ -429,17 +427,18 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: 5),
                     // Line 2: Speeds
                     Text(
                       lineSpeeds,
                       style: const TextStyle(
                         color: _oneUiTextPrimary,
-                        fontSize: 13.5,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
                         height: 1.2,
                       ),
                     ),
-                    const SizedBox(height: 3),
+                    const SizedBox(height: 2),
                     // Line 3: Traffic Stats
                     Text(
                       lineTraffic,
@@ -542,17 +541,26 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
 
   Widget _buildShadeFooter() {
     return const Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
+      padding: EdgeInsets.only(left: 16.0, right: 16.0, top: 4.0, bottom: 12.0),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
           Text(
             'Notification settings',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
           ),
+          SizedBox(width: 20),
           Text(
             'Clear',
-            style: TextStyle(color: Colors.white70, fontSize: 12),
+            style: TextStyle(
+              color: Colors.white70,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+            ),
           ),
         ],
       ),
