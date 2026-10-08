@@ -6,10 +6,10 @@
     android:orientation="horizontal"
     android:gravity="center_vertical"
     android:background="@android:color/transparent"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp"
-    android:paddingTop="6dp"
-    android:paddingBottom="6dp">
+    android:paddingStart="12dp"
+    android:paddingEnd="14dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
     <!-- Speed Indicator (Numeric Speed on top, Unit below) -->
     <LinearLayout
@@ -77,8 +77,8 @@
     <!-- Subtle Samsung-Style Expand Chevron -->
     <ImageView
         android:id="@+id/notif_chevron"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="14dp"
+        android:layout_height="14dp"
         android:layout_gravity="center_vertical"
         android:src="@drawable/ic_notif_chevron_down"
         android:tint="@color/oneui_chevron"

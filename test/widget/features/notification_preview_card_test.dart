@@ -104,5 +104,28 @@ void main() {
       expect(find.text('Notification settings'), findsOneWidget);
       expect(find.text('Clear'), findsOneWidget);
     });
+
+    testWidgets('tapping card directly toggles between collapsed and expanded states', (tester) async {
+      await tester.pumpWidget(buildSubject());
+      await tester.pumpAndSettle();
+
+      // Initially collapsed
+      expect(find.byKey(const ValueKey('collapsed_card')), findsOneWidget);
+      expect(find.text('Internet Speed Meter Lite'), findsNothing);
+
+      // Tap collapsed card -> should expand
+      await tester.tap(find.byKey(const ValueKey('collapsed_card')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('expanded_card')), findsOneWidget);
+      expect(find.text('Internet Speed Meter Lite'), findsOneWidget);
+
+      // Tap expanded card -> should collapse
+      await tester.tap(find.byKey(const ValueKey('expanded_card')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const ValueKey('collapsed_card')), findsOneWidget);
+      expect(find.text('Internet Speed Meter Lite'), findsNothing);
+    });
   });
 }

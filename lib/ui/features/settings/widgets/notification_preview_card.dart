@@ -254,79 +254,90 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
         : 'Down: 0 B/s   Up: 0 B/s';
     final lineTraffic = 'Mobile: 910.4 MB   WiFi: 0 MB';
 
-    return Container(
-      key: const ValueKey('collapsed_card'),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: _oneUiNotifBg,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const ValueKey('collapsed_card'),
         borderRadius: BorderRadius.circular(26),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          // Left speed indicator: Numeric value on top, unit underneath
-          SizedBox(
-            width: 44,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Text(
-                  dlVal,
-                  style: const TextStyle(
-                    color: _oneUiTextPrimary,
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    height: 1.1,
-                  ),
-                ),
-                Text(
-                  dlUnit,
-                  style: const TextStyle(
-                    color: _oneUiUnitBlue,
-                    fontSize: 9.5,
-                    height: 1.1,
-                  ),
-                ),
-              ],
-            ),
+        onTap: () {
+          setState(() {
+            _isExpanded = true;
+          });
+        },
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          decoration: BoxDecoration(
+            color: _oneUiNotifBg,
+            borderRadius: BorderRadius.circular(26),
           ),
-          const SizedBox(width: 14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Left speed indicator: Numeric value on top, unit underneath
+              SizedBox(
+                width: 44,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      dlVal,
+                      style: const TextStyle(
+                        color: _oneUiTextPrimary,
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        height: 1.1,
+                      ),
+                    ),
+                    Text(
+                      dlUnit,
+                      style: const TextStyle(
+                        color: _oneUiUnitBlue,
+                        fontSize: 9.5,
+                        height: 1.1,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 14),
 
-          // Main text lines
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  lineSpeeds,
-                  style: const TextStyle(
-                    color: _oneUiTextPrimary,
-                    fontSize: 13.5,
-                    height: 1.2,
-                  ),
+              // Main text lines
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      lineSpeeds,
+                      style: const TextStyle(
+                        color: _oneUiTextPrimary,
+                        fontSize: 13.5,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      lineTraffic,
+                      style: const TextStyle(
+                        color: _oneUiTextSecondary,
+                        fontSize: 12,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  lineTraffic,
-                  style: const TextStyle(
-                    color: _oneUiTextSecondary,
-                    fontSize: 12,
-                    height: 1.2,
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
 
-          // Subtle downward chevron
-          const Icon(
-            Icons.keyboard_arrow_down,
-            color: _oneUiChevron,
-            size: 18,
+              // Subtle downward chevron
+              const Icon(
+                Icons.keyboard_arrow_down,
+                color: _oneUiChevron,
+                size: 16,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -340,98 +351,110 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
         : 'Down: 0 B/s   Up: 0 B/s';
     final lineTraffic = 'Mobile: 910.4 MB   WiFi: 0 MB';
 
-    return Container(
-      key: const ValueKey('expanded_card'),
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      decoration: BoxDecoration(
-        color: _oneUiNotifBg,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        key: const ValueKey('expanded_card'),
         borderRadius: BorderRadius.circular(26),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Left speed indicator: Numeric value on top, unit underneath
-          Padding(
-            padding: const EdgeInsets.only(top: 2.0),
-            child: SizedBox(
-              width: 44,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    dlVal,
-                    style: const TextStyle(
-                      color: _oneUiTextPrimary,
-                      fontSize: 17,
-                      fontWeight: FontWeight.bold,
-                      height: 1.1,
-                    ),
+        onTap: () {
+          setState(() {
+            _isExpanded = false;
+          });
+        },
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+          decoration: BoxDecoration(
+            color: _oneUiNotifBg,
+            borderRadius: BorderRadius.circular(26),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Left speed indicator: Numeric value on top, unit underneath
+              Padding(
+                padding: const EdgeInsets.only(top: 1.0),
+                child: SizedBox(
+                  width: 44,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        dlVal,
+                        style: const TextStyle(
+                          color: _oneUiTextPrimary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          height: 1.1,
+                        ),
+                      ),
+                      Text(
+                        dlUnit,
+                        style: const TextStyle(
+                          color: _oneUiUnitBlue,
+                          fontSize: 9.5,
+                          height: 1.1,
+                        ),
+                      ),
+                    ],
                   ),
-                  Text(
-                    dlUnit,
-                    style: const TextStyle(
-                      color: _oneUiUnitBlue,
-                      fontSize: 9.5,
-                      height: 1.1,
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 14),
+              const SizedBox(width: 14),
 
-          // Main content: App title, speeds, traffic stats
-          Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Top Header: App Name
-                const Text(
-                  'Internet Speed Meter Lite',
-                  style: TextStyle(
-                    color: _oneUiTextPrimary,
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
+              // Main content: App title + chevron in row 1, speeds in row 2, traffic stats in row 3
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Top Header: App Name + Chevron inline (matches ss2.jpg)
+                    const Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Internet Speed Meter Lite',
+                          style: TextStyle(
+                            color: _oneUiTextPrimary,
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w600,
+                            height: 1.2,
+                          ),
+                        ),
+                        Icon(
+                          Icons.keyboard_arrow_up,
+                          color: _oneUiChevron,
+                          size: 16,
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    // Line 2: Speeds
+                    Text(
+                      lineSpeeds,
+                      style: const TextStyle(
+                        color: _oneUiTextPrimary,
+                        fontSize: 13.5,
+                        height: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    // Line 3: Traffic Stats
+                    Text(
+                      lineTraffic,
+                      style: const TextStyle(
+                        color: _oneUiTextSecondary,
+                        fontSize: 12,
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 4),
-                // Line 2: Speeds
-                Text(
-                  lineSpeeds,
-                  style: const TextStyle(
-                    color: _oneUiTextPrimary,
-                    fontSize: 13.5,
-                    height: 1.2,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                // Line 3: Traffic Stats
-                Text(
-                  lineTraffic,
-                  style: const TextStyle(
-                    color: _oneUiTextSecondary,
-                    fontSize: 12,
-                    height: 1.2,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
-
-          // Subtle upward chevron
-          const Padding(
-            padding: EdgeInsets.only(top: 2.0),
-            child: Icon(
-              Icons.keyboard_arrow_up,
-              color: _oneUiChevron,
-              size: 18,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
