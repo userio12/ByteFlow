@@ -30,6 +30,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
   static const Color _oneUiChevron = Color(0xFF8E8E93);
   static const Color _oneUiBlue = Color(0xFF2C75FF);
   static const Color _oneUiInactiveToggle = Color(0xFF3A3A3C);
+  static const Color _oneUiUnitBlue = Color(0xFF7CA8F8);
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +180,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
 
   /// System Status Bar replicating Samsung One UI 4-5
   Widget _buildStatusBarStrip() {
-    final statusDlSpeed = widget.useBits ? '184' : (_isExpanded ? '28' : '23');
+    final statusDlSpeed = '0';
     final statusUnit = widget.useBits ? 'Kbps' : 'KB/s';
 
     return Container(
@@ -246,12 +247,12 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
 
   /// Collapsed Samsung One UI notification card (No app title)
   Widget _buildCollapsedCard() {
-    final dlVal = widget.useBits ? '184' : '23';
+    final dlVal = '0';
     final dlUnit = widget.useBits ? 'Kbps' : 'KB/s';
     final lineSpeeds = widget.useBits
-        ? 'Down: 184 Kbps   Up: 3.5 Kbps'
-        : 'Down: 23 KB/s   Up: 438 B/s';
-    final lineTraffic = 'Mobile: 393.5 MB   WiFi: 533 MB';
+        ? 'Down: 0 b/s   Up: 0 b/s'
+        : 'Down: 0 B/s   Up: 0 B/s';
+    final lineTraffic = 'Mobile: 910.4 MB   WiFi: 0 MB';
 
     return Container(
       key: const ValueKey('collapsed_card'),
@@ -282,7 +283,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                 Text(
                   dlUnit,
                   style: const TextStyle(
-                    color: _oneUiTextSecondary,
+                    color: _oneUiUnitBlue,
                     fontSize: 9.5,
                     height: 1.1,
                   ),
@@ -332,12 +333,12 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
 
   /// Expanded Samsung One UI notification card (With app identity header)
   Widget _buildExpandedCard() {
-    final dlVal = widget.useBits ? '224' : '28';
+    final dlVal = '0';
     final dlUnit = widget.useBits ? 'Kbps' : 'KB/s';
     final lineSpeeds = widget.useBits
-        ? 'Down: 224 Kbps   Up: 768 bps'
-        : 'Down: 28 KB/s   Up: 96 B/s';
-    final lineTraffic = 'Mobile: 393.7 MB   WiFi: 533 MB';
+        ? 'Down: 0 b/s   Up: 0 b/s'
+        : 'Down: 0 B/s   Up: 0 B/s';
+    final lineTraffic = 'Mobile: 910.4 MB   WiFi: 0 MB';
 
     return Container(
       key: const ValueKey('expanded_card'),
@@ -370,7 +371,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                   Text(
                     dlUnit,
                     style: const TextStyle(
-                      color: _oneUiTextSecondary,
+                      color: _oneUiUnitBlue,
                       fontSize: 9.5,
                       height: 1.1,
                     ),

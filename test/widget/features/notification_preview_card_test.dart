@@ -34,13 +34,21 @@ void main() {
       expect(find.text('10:14'), findsOneWidget);
       expect(find.text('91%'), findsOneWidget);
 
-      // Speed indicator: 23 KB/s (numeric on top, unit underneath)
-      expect(find.text('23'), findsWidgets);
+      // Speed indicator: 0 KB/s (numeric on top, unit underneath)
+      expect(find.text('0'), findsWidgets);
       expect(find.text('KB/s'), findsWidgets);
 
+      // Unit text should be styled with light-blue color inside the notification card
+      final cardUnitFinder = find.descendant(
+        of: find.byKey(const ValueKey('collapsed_card')),
+        matching: find.text('KB/s'),
+      );
+      final unitText = tester.widget<Text>(cardUnitFinder);
+      expect(unitText.style?.color, const Color(0xFF7CA8F8));
+
       // Collapsed view text lines
-      expect(find.text('Down: 23 KB/s   Up: 438 B/s'), findsOneWidget);
-      expect(find.text('Mobile: 393.5 MB   WiFi: 533 MB'), findsOneWidget);
+      expect(find.text('Down: 0 B/s   Up: 0 B/s'), findsOneWidget);
+      expect(find.text('Mobile: 910.4 MB   WiFi: 0 MB'), findsOneWidget);
       expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
 
       // Crucial: App title must NOT be in collapsed view
@@ -57,8 +65,8 @@ void main() {
 
       // App identity header is now visible
       expect(find.text('Internet Speed Meter Lite'), findsOneWidget);
-      expect(find.text('Down: 28 KB/s   Up: 96 B/s'), findsOneWidget);
-      expect(find.text('Mobile: 393.7 MB   WiFi: 533 MB'), findsOneWidget);
+      expect(find.text('Down: 0 B/s   Up: 0 B/s'), findsOneWidget);
+      expect(find.text('Mobile: 910.4 MB   WiFi: 0 MB'), findsOneWidget);
       expect(find.byIcon(Icons.keyboard_arrow_up), findsOneWidget);
 
       // Obsolete buttons should not exist
@@ -70,9 +78,9 @@ void main() {
       await tester.pumpWidget(buildSubject(useBits: true));
       await tester.pumpAndSettle();
 
-      expect(find.text('184'), findsWidgets);
+      expect(find.text('0'), findsWidgets);
       expect(find.text('Kbps'), findsWidgets);
-      expect(find.text('Down: 184 Kbps   Up: 3.5 Kbps'), findsOneWidget);
+      expect(find.text('Down: 0 b/s   Up: 0 b/s'), findsOneWidget);
     });
 
     testWidgets('renders static icon when isStatusBarSpeedIcon is false', (tester) async {

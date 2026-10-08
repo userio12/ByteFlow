@@ -122,7 +122,7 @@ object SpeedNotificationHelper {
      */
     fun splitSpeed(bytesPerSec: Long, useBits: Boolean = false): Pair<String, String> {
         if (bytesPerSec <= 0) {
-            return Pair("0", if (useBits) "bps" else "B/s")
+            return Pair("0", if (useBits) "Kbps" else "KB/s")
         }
 
         return if (useBits) {

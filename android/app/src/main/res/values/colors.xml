@@ -31,4 +31,5 @@
     <color name="oneui_text_primary">#FFFFFF</color>
     <color name="oneui_text_secondary">#B0B0B0</color>
     <color name="oneui_chevron">#8E8E93</color>
+    <color name="oneui_unit_blue">#7CA8F8</color>
 </resources>
