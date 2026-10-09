@@ -25,7 +25,6 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
 
   // Modern ByteFlow notification tokens (matching colors.xml)
   static const Color _notifCardBg = Color(0xFF23262D);
-  static const Color _notifBadgeBg = Color(0xFF1F2228);
   static const Color _notifBorder = Color(0xFF2F333D);
   static const Color _notifTextPrimary = Color(0xFFF1F3F9);
   static const Color _notifTextSecondary = Color(0xFF9DA3AE);
@@ -248,7 +247,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
     );
   }
 
-  /// Collapsed modern notification card (Dual Down/Up pills and Mobile/Wi-Fi row)
+  /// Collapsed modern notification card (Dual Down/Up speeds and Mobile/Wi-Fi row)
   Widget _buildCollapsedCard() {
     final dlSpeedStr = widget.useBits ? '0 b/s' : '0 B/s';
     final ulSpeedStr = widget.useBits ? '0 b/s' : '0 B/s';
@@ -275,78 +274,46 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Throughput Pills Row (Down and Up)
+              // Throughput row
               Row(
                 children: [
-                  // Down Pill
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _notifBadgeBg,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _notifBorder),
-                      ),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'Down',
-                            style: TextStyle(
-                              color: _notifDownload,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            dlSpeedStr,
-                            style: const TextStyle(
-                              color: _notifTextPrimary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                  const Text(
+                    'Down: ',
+                    style: TextStyle(
+                      color: _notifDownload,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // Up Pill
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: _notifBadgeBg,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _notifBorder),
-                      ),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'Up',
-                            style: TextStyle(
-                              color: _notifUpload,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            ulSpeedStr,
-                            style: const TextStyle(
-                              color: _notifTextPrimary,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                  Text(
+                    dlSpeedStr,
+                    style: const TextStyle(
+                      color: _notifTextPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'Up: ',
+                    style: TextStyle(
+                      color: _notifUpload,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    ulSpeedStr,
+                    style: const TextStyle(
+                      color: _notifTextPrimary,
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 6),
-              // Subtitle
+              const SizedBox(height: 4),
+              // Subtitle: Mobile and Wi-Fi Traffic Stats
               Text(
                 lineTraffic,
                 style: const TextStyle(
@@ -361,11 +328,10 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
     );
   }
 
-  /// Expanded modern notification card (ByteFlow title, DOWN/UP cards, and Mobile/Wi-Fi row)
+  /// Expanded modern notification card (Network status, Down/Up speeds, and Mobile/Wi-Fi row)
   Widget _buildExpandedCard() {
     final dlSpeedStr = widget.useBits ? '0 b/s' : '0 B/s';
     final ulSpeedStr = widget.useBits ? '0 b/s' : '0 B/s';
-    final lineTraffic = 'Mobile: 910.4 MB  •  Wi-Fi: 0 MB';
 
     return Material(
       color: Colors.transparent,
@@ -378,7 +344,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
           });
         },
         child: Ink(
-          padding: const EdgeInsets.all(12.0),
+          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
           decoration: BoxDecoration(
             color: _notifCardBg,
             borderRadius: BorderRadius.circular(16),
@@ -388,93 +354,68 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header: ByteFlow
+              // Row 1: Network Status (Zero redundant ByteFlow title)
               const Text(
-                'ByteFlow',
+                'Wi-Fi • Connected',
                 style: TextStyle(
-                  color: _notifTextPrimary,
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
+                  color: _notifTextSecondary,
+                  fontSize: 11.5,
                 ),
               ),
-              const SizedBox(height: 9),
-              // Dual Metric Cards Row
+              const SizedBox(height: 5),
+              // Row 2: Throughput row
               Row(
                 children: [
-                  // DOWN Card
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _notifBadgeBg,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _notifBorder),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'DOWN',
-                            style: TextStyle(
-                              color: _notifDownload,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            dlSpeedStr,
-                            style: const TextStyle(
-                              color: _notifTextPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                  const Text(
+                    'Down: ',
+                    style: TextStyle(
+                      color: _notifDownload,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // UP Card
-                  Expanded(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: _notifBadgeBg,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: _notifBorder),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'UP',
-                            style: TextStyle(
-                              color: _notifUpload,
-                              fontSize: 11,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            ulSpeedStr,
-                            style: const TextStyle(
-                              color: _notifTextPrimary,
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
+                  Text(
+                    dlSpeedStr,
+                    style: const TextStyle(
+                      color: _notifTextPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  const Text(
+                    'Up: ',
+                    style: TextStyle(
+                      color: _notifUpload,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    ulSpeedStr,
+                    style: const TextStyle(
+                      color: _notifTextPrimary,
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 9),
-              // Subtitle
-              Text(
-                lineTraffic,
-                style: const TextStyle(
+              const SizedBox(height: 5),
+              // Row 3: Today's Traffic Stats
+              const Text(
+                'Today: 910.4 MB Mobile  •  0 MB Wi-Fi',
+                style: TextStyle(
+                  color: _notifTextPrimary,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 4),
+              // Row 4: Data Plan / Quota Status
+              const Text(
+                'Data Plan: Active (Quota: 1.8 GB remaining)',
+                style: TextStyle(
                   color: _notifTextSecondary,
                   fontSize: 11.5,
                 ),

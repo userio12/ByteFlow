@@ -73,24 +73,40 @@ object SpeedNotificationHelper {
         }
         val pendingIntent = PendingIntent.getActivity(context, 0, launchIntent, piFlags)
 
-        // 2. Formatted Speed and Traffic Strings
+        // 2. Formatted Speed, Traffic, Network, and Quota Strings
         val dlSpeedStr = formatSpeed(downloadBps, useBits)
         val ulSpeedStr = formatSpeed(uploadBps, useBits)
         val trafficLine = "Mobile: ${formatBytes(todayMobileBytes)}  •  Wi-Fi: ${formatBytes(todayWifiBytes)}"
+        val expandedTrafficLine = "Today: ${formatBytes(todayMobileBytes)} Mobile  •  ${formatBytes(todayWifiBytes)} Wi-Fi"
 
-        // 3. Collapsed RemoteViews (Modern compact card)
+        val networkLine = when {
+            networkType.equals("Wi-Fi", ignoreCase = true) -> "Wi-Fi • Connected"
+            !carrierName.isNullOrBlank() -> "$carrierName ($networkType) • Connected"
+            else -> "$networkType • Connected"
+        }
+
+        val quotaLine = if (quotaBytes > 0L) {
+            val remaining = (quotaBytes - todayMobileBytes).coerceAtLeast(0L)
+            val percent = ((todayMobileBytes.toDouble() / quotaBytes.toDouble()) * 100).toInt().coerceIn(0, 100)
+            "Data Plan: ${formatBytes(remaining)} remaining ($percent% used)"
+        } else {
+            "Data Plan: Active"
+        }
+
+        // 3. Collapsed RemoteViews (Clean 2-line glanceable layout)
         val viewsCollapsed = RemoteViews(context.packageName, R.layout.notification_speed_collapsed).apply {
             setTextViewText(R.id.notif_collapsed_download, dlSpeedStr)
             setTextViewText(R.id.notif_collapsed_upload, ulSpeedStr)
             setTextViewText(R.id.notif_collapsed_traffic, trafficLine)
         }
 
-        // 4. Expanded RemoteViews (Modern expanded card)
+        // 4. Expanded RemoteViews (Network status, speeds, today's breakdown, and data plan)
         val viewsExpanded = RemoteViews(context.packageName, R.layout.notification_speed_expanded).apply {
-            setTextViewText(R.id.notif_expanded_title, context.getString(R.string.speed_notification_title))
+            setTextViewText(R.id.notif_expanded_network, networkLine)
             setTextViewText(R.id.notif_expanded_download, dlSpeedStr)
             setTextViewText(R.id.notif_expanded_upload, ulSpeedStr)
-            setTextViewText(R.id.notif_expanded_traffic, trafficLine)
+            setTextViewText(R.id.notif_expanded_traffic, expandedTrafficLine)
+            setTextViewText(R.id.notif_expanded_quota, quotaLine)
         }
 
         // 5. Construct NotificationCompat.Builder

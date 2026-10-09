@@ -22,7 +22,7 @@ void main() {
       );
     }
 
-    testWidgets('renders initial collapsed Samsung One UI preview without app title', (tester) async {
+    testWidgets('renders initial collapsed preview without app title', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -43,9 +43,9 @@ void main() {
       final unitText = tester.widget<Text>(statusUnitFinder);
       expect(unitText.style?.color, const Color(0xFF8AB4F8));
 
-      // Collapsed view throughput pills
-      expect(find.text('Down'), findsOneWidget);
-      expect(find.text('Up'), findsOneWidget);
+      // Collapsed view throughput speeds
+      expect(find.text('Down: '), findsOneWidget);
+      expect(find.text('Up: '), findsOneWidget);
       expect(find.text('0 B/s'), findsNWidgets(2));
       expect(find.text('Mobile: 910.4 MB  •  Wi-Fi: 0 MB'), findsOneWidget);
 
@@ -58,7 +58,7 @@ void main() {
       expect(find.text('Internet Speed Meter Lite'), findsNothing);
     });
 
-    testWidgets('switches to expanded view with ByteFlow header and throughput cards', (tester) async {
+    testWidgets('switches to expanded view with network info, speeds, and quota status', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -66,12 +66,18 @@ void main() {
       await tester.tap(find.text('Expanded'));
       await tester.pumpAndSettle();
 
-      // App identity header is now visible as ByteFlow
-      expect(find.text('ByteFlow'), findsOneWidget);
-      expect(find.text('DOWN'), findsOneWidget);
-      expect(find.text('UP'), findsOneWidget);
+      // Network connection line is visible
+      expect(find.text('Wi-Fi • Connected'), findsOneWidget);
+      expect(find.text('Down: '), findsOneWidget);
+      expect(find.text('Up: '), findsOneWidget);
       expect(find.text('0 B/s'), findsNWidgets(2));
-      expect(find.text('Mobile: 910.4 MB  •  Wi-Fi: 0 MB'), findsOneWidget);
+      expect(find.text('Today: 910.4 MB Mobile  •  0 MB Wi-Fi'), findsOneWidget);
+      expect(find.text('Data Plan: Active (Quota: 1.8 GB remaining)'), findsOneWidget);
+
+      // App identity must NOT be duplicated in card body
+      expect(find.text('ByteFlow'), findsNothing);
+      expect(find.text('DOWN'), findsNothing);
+      expect(find.text('UP'), findsNothing);
 
       // Obsolete buttons and legacy text should not exist
       expect(find.text('Internet Speed Meter Lite'), findsNothing);
@@ -86,8 +92,8 @@ void main() {
 
       expect(find.text('0'), findsWidgets);
       expect(find.text('Kbps'), findsOneWidget);
-      expect(find.text('Down'), findsOneWidget);
-      expect(find.text('Up'), findsOneWidget);
+      expect(find.text('Down: '), findsOneWidget);
+      expect(find.text('Up: '), findsOneWidget);
       expect(find.text('0 b/s'), findsNWidgets(2));
     });
 
@@ -126,9 +132,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('expanded_card')), findsOneWidget);
-      expect(find.text('ByteFlow'), findsOneWidget);
-      expect(find.text('DOWN'), findsOneWidget);
-      expect(find.text('UP'), findsOneWidget);
+      expect(find.text('Wi-Fi • Connected'), findsOneWidget);
+      expect(find.text('ByteFlow'), findsNothing);
+      expect(find.text('DOWN'), findsNothing);
+      expect(find.text('UP'), findsNothing);
 
       // Tap expanded card -> should collapse
       await tester.tap(find.byKey(const ValueKey('expanded_card')));

@@ -4,110 +4,72 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@drawable/notification_card_background"
-    android:paddingStart="14dp"
-    android:paddingEnd="14dp"
-    android:paddingTop="9dp"
-    android:paddingBottom="9dp">
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
+    android:paddingTop="3dp"
+    android:paddingBottom="3dp">
 
-    <!-- Throughput Pills Row (Down and Up) -->
+    <!-- Row 1: Speeds (Down & Up) -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical">
 
-        <!-- Download Pill -->
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- Download Speed -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/notification_badge_background"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp">
+            android:text="Down: "
+            android:textColor="@color/notif_download"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Down"
-                android:textColor="@color/notif_download"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:includeFontPadding="false" />
-
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/notif_collapsed_download"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 B/s"
-                android:textColor="@color/notif_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium"
-                android:includeFontPadding="false" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/notif_collapsed_download"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 B/s"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false" />
 
         <!-- Spacer -->
         <FrameLayout
-            android:layout_width="8dp"
+            android:layout_width="20dp"
             android:layout_height="1dp" />
 
-        <!-- Upload Pill -->
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- Upload Speed -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:background="@drawable/notification_badge_background"
-            android:paddingStart="10dp"
-            android:paddingEnd="10dp"
-            android:paddingTop="6dp"
-            android:paddingBottom="6dp">
+            android:text="Up: "
+            android:textColor="@color/notif_upload"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Up"
-                android:textColor="@color/notif_upload"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:includeFontPadding="false" />
-
-            <FrameLayout
-                android:layout_width="0dp"
-                android:layout_height="1dp"
-                android:layout_weight="1" />
-
-            <TextView
-                android:id="@+id/notif_collapsed_upload"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0 B/s"
-                android:textColor="@color/notif_text_primary"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:fontFamily="sans-serif-medium"
-                android:includeFontPadding="false" />
-        </LinearLayout>
+        <TextView
+            android:id="@+id/notif_collapsed_upload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 B/s"
+            android:textColor="@color/notif_text_primary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:fontFamily="sans-serif-medium"
+            android:includeFontPadding="false" />
     </LinearLayout>
 
-    <!-- Subtitle: Mobile and Wi-Fi Traffic Stats -->
+    <!-- Row 2: Subtitle: Mobile and Wi-Fi Traffic Stats -->
     <TextView
         android:id="@+id/notif_collapsed_traffic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5dp"
-        android:layout_marginStart="2dp"
+        android:layout_marginTop="3dp"
         android:text="Mobile: 0 B  •  Wi-Fi: 0 B"
         android:textColor="@color/notif_text_secondary"
         android:textSize="11.5sp"
