@@ -38,28 +38,27 @@ void main() {
       expect(find.text('0'), findsWidgets);
       expect(find.text('KB/s'), findsWidgets);
 
-      // Unit text should be styled with light-blue color inside the notification card
-      final cardUnitFinder = find.descendant(
-        of: find.byKey(const ValueKey('collapsed_card')),
-        matching: find.text('KB/s'),
-      );
-      final unitText = tester.widget<Text>(cardUnitFinder);
+      // Unit text should be styled with light-blue color inside the status bar strip
+      final statusUnitFinder = find.text('KB/s');
+      final unitText = tester.widget<Text>(statusUnitFinder);
       expect(unitText.style?.color, const Color(0xFF8AB4F8));
 
-      // Collapsed view text lines
-      expect(find.text('Down: 0 B/s   Up: 0 B/s'), findsOneWidget);
-      expect(find.text('Mobile: 910.4 MB   WiFi: 0 MB'), findsOneWidget);
-      expect(find.byIcon(Icons.keyboard_arrow_down), findsOneWidget);
+      // Collapsed view throughput pills
+      expect(find.text('Down'), findsOneWidget);
+      expect(find.text('Up'), findsOneWidget);
+      expect(find.text('0 B/s'), findsNWidgets(2));
+      expect(find.text('Mobile: 910.4 MB  •  Wi-Fi: 0 MB'), findsOneWidget);
 
       // Bottom notification shade controls
       expect(find.text('Notification settings'), findsOneWidget);
       expect(find.text('Clear'), findsOneWidget);
 
       // Crucial: App title must NOT be in collapsed view
+      expect(find.text('ByteFlow'), findsNothing);
       expect(find.text('Internet Speed Meter Lite'), findsNothing);
     });
 
-    testWidgets('switches to expanded view with app identity header and upward chevron', (tester) async {
+    testWidgets('switches to expanded view with ByteFlow header and throughput cards', (tester) async {
       await tester.pumpWidget(buildSubject());
       await tester.pumpAndSettle();
 
@@ -67,15 +66,18 @@ void main() {
       await tester.tap(find.text('Expanded'));
       await tester.pumpAndSettle();
 
-      // App identity header is now visible
-      expect(find.text('Internet Speed Meter Lite'), findsOneWidget);
-      expect(find.text('Down: 0 B/s   Up: 0 B/s'), findsOneWidget);
-      expect(find.text('Mobile: 910.4 MB   WiFi: 0 MB'), findsOneWidget);
-      expect(find.byIcon(Icons.keyboard_arrow_up), findsOneWidget);
+      // App identity header is now visible as ByteFlow
+      expect(find.text('ByteFlow'), findsOneWidget);
+      expect(find.text('DOWN'), findsOneWidget);
+      expect(find.text('UP'), findsOneWidget);
+      expect(find.text('0 B/s'), findsNWidgets(2));
+      expect(find.text('Mobile: 910.4 MB  •  Wi-Fi: 0 MB'), findsOneWidget);
 
-      // Obsolete buttons should not exist
+      // Obsolete buttons and legacy text should not exist
+      expect(find.text('Internet Speed Meter Lite'), findsNothing);
       expect(find.text('⚡ Dashboard'), findsNothing);
       expect(find.text('⏸ Pause'), findsNothing);
+      expect(find.text('Today\'s Usage'), findsNothing);
     });
 
     testWidgets('renders bits formatting when useBits is true', (tester) async {
@@ -83,8 +85,10 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('0'), findsWidgets);
-      expect(find.text('Kbps'), findsWidgets);
-      expect(find.text('Down: 0 b/s   Up: 0 b/s'), findsOneWidget);
+      expect(find.text('Kbps'), findsOneWidget);
+      expect(find.text('Down'), findsOneWidget);
+      expect(find.text('Up'), findsOneWidget);
+      expect(find.text('0 b/s'), findsNWidgets(2));
     });
 
     testWidgets('renders static icon when isStatusBarSpeedIcon is false', (tester) async {
@@ -115,21 +119,23 @@ void main() {
 
       // Initially collapsed
       expect(find.byKey(const ValueKey('collapsed_card')), findsOneWidget);
-      expect(find.text('Internet Speed Meter Lite'), findsNothing);
+      expect(find.text('ByteFlow'), findsNothing);
 
       // Tap collapsed card -> should expand
       await tester.tap(find.byKey(const ValueKey('collapsed_card')));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('expanded_card')), findsOneWidget);
-      expect(find.text('Internet Speed Meter Lite'), findsOneWidget);
+      expect(find.text('ByteFlow'), findsOneWidget);
+      expect(find.text('DOWN'), findsOneWidget);
+      expect(find.text('UP'), findsOneWidget);
 
       // Tap expanded card -> should collapse
       await tester.tap(find.byKey(const ValueKey('expanded_card')));
       await tester.pumpAndSettle();
 
       expect(find.byKey(const ValueKey('collapsed_card')), findsOneWidget);
-      expect(find.text('Internet Speed Meter Lite'), findsNothing);
+      expect(find.text('ByteFlow'), findsNothing);
     });
   });
 }

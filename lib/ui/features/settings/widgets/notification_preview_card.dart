@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_icons.dart';
 
-/// Authentic Samsung One UI (One UI 4–5 / Android 12) Live Notification Preview.
-/// Matches the reference screenshots of "Internet Speed Meter Lite" on Samsung Galaxy.
+/// Modern ByteFlow Material 3 Live Notification Preview.
+/// Renders authentic collapsed and expanded cards matching the native Android RemoteViews.
 class NotificationPreviewCard extends StatefulWidget {
   final bool useBits;
   final bool isStatusBarSpeedIcon;
@@ -23,14 +23,19 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
   bool _isExpanded = false;
   bool _showShadeContext = false;
 
-  // Colors matching Samsung One UI dark mode notification shade
-  static const Color _oneUiNotifBg = Color(0xFF2D2D2D);
-  static const Color _oneUiTextPrimary = Color(0xFFFFFFFF);
-  static const Color _oneUiTextSecondary = Color(0xFF999999);
-  static const Color _oneUiChevron = Color(0xFF8E8E93);
-  static const Color _oneUiBlue = Color(0xFF2C75FF);
-  static const Color _oneUiInactiveToggle = Color(0xFF3A3A3C);
-  static const Color _oneUiUnitBlue = Color(0xFF8AB4F8);
+  // Modern ByteFlow notification tokens (matching colors.xml)
+  static const Color _notifCardBg = Color(0xFF23262D);
+  static const Color _notifBadgeBg = Color(0xFF1F2228);
+  static const Color _notifBorder = Color(0xFF2F333D);
+  static const Color _notifTextPrimary = Color(0xFFF1F3F9);
+  static const Color _notifTextSecondary = Color(0xFF9DA3AE);
+  static const Color _notifDownload = Color(0xFF06B6D4);
+  static const Color _notifUpload = Color(0xFFEC4899);
+  static const Color _notifUnitBlue = Color(0xFF8AB4F8);
+
+  // Shade context colors
+  static const Color _shadeBlue = Color(0xFF2C75FF);
+  static const Color _shadeInactiveToggle = Color(0xFF3A3A3C);
 
   @override
   Widget build(BuildContext context) {
@@ -123,7 +128,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                         ),
                         const SizedBox(width: 6),
                         Text(
-                          'One UI Shade View',
+                          'System Shade View',
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: _showShadeContext ? colorScheme.primary : colorScheme.onSurfaceVariant,
                             fontWeight: _showShadeContext ? FontWeight.bold : FontWeight.normal,
@@ -150,7 +155,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                   _buildStatusBarStrip(),
 
                   if (_showShadeContext) ...[
-                    // One UI Quick Settings Panel
+                    // Quick Settings Panel
                     _buildQuickSettingsPanel(),
                   ],
 
@@ -165,7 +170,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                     ),
                   ),
 
-                  // Bottom notification shade controls (always visible below the card)
+                  // Bottom notification shade controls
                   _buildShadeFooter(),
                 ],
               ),
@@ -176,7 +181,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
     );
   }
 
-  /// System Status Bar replicating Samsung One UI 4-5
+  /// System Status Bar replicating Android status bar with speed indicator
   Widget _buildStatusBarStrip() {
     final statusDlSpeed = '0';
     final statusUnit = widget.useBits ? 'Kbps' : 'KB/s';
@@ -214,7 +219,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
                 Text(
                   statusUnit,
                   style: const TextStyle(
-                    color: _oneUiTextSecondary,
+                    color: _notifUnitBlue,
                     fontSize: 7,
                     fontWeight: FontWeight.normal,
                     height: 1.0,
@@ -243,20 +248,17 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
     );
   }
 
-  /// Collapsed Samsung One UI notification card (No app title)
+  /// Collapsed modern notification card (Dual Down/Up pills and Mobile/Wi-Fi row)
   Widget _buildCollapsedCard() {
-    final dlVal = '0';
-    final dlUnit = widget.useBits ? 'Kbps' : 'KB/s';
-    final lineSpeeds = widget.useBits
-        ? 'Down: 0 b/s   Up: 0 b/s'
-        : 'Down: 0 B/s   Up: 0 B/s';
-    final lineTraffic = 'Mobile: 910.4 MB   WiFi: 0 MB';
+    final dlSpeedStr = widget.useBits ? '0 b/s' : '0 B/s';
+    final ulSpeedStr = widget.useBits ? '0 b/s' : '0 B/s';
+    final lineTraffic = 'Mobile: 910.4 MB  •  Wi-Fi: 0 MB';
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         key: const ValueKey('collapsed_card'),
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(16),
         onTap: () {
           setState(() {
             _isExpanded = true;
@@ -265,73 +267,92 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
           decoration: BoxDecoration(
-            color: _oneUiNotifBg,
-            borderRadius: BorderRadius.circular(32),
+            color: _notifCardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _notifBorder),
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left speed indicator: Numeric value on top, unit underneath
-              SizedBox(
-                width: 40,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text(
-                      dlVal,
-                      style: const TextStyle(
-                        color: _oneUiTextPrimary,
-                        fontSize: 18,
-                        fontWeight: FontWeight.normal,
-                        height: 1.1,
+              // Throughput Pills Row (Down and Up)
+              Row(
+                children: [
+                  // Down Pill
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _notifBadgeBg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _notifBorder),
+                      ),
+                      child: Row(
+                        children: [
+                          const Text(
+                            'Down',
+                            style: TextStyle(
+                              color: _notifDownload,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            dlSpeedStr,
+                            style: const TextStyle(
+                              color: _notifTextPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    Text(
-                      dlUnit,
-                      style: const TextStyle(
-                        color: _oneUiUnitBlue,
-                        fontSize: 9,
-                        height: 1.1,
+                  ),
+                  const SizedBox(width: 8),
+                  // Up Pill
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: _notifBadgeBg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _notifBorder),
+                      ),
+                      child: Row(
+                        children: [
+                          const Text(
+                            'Up',
+                            style: TextStyle(
+                              color: _notifUpload,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            ulSpeedStr,
+                            style: const TextStyle(
+                              color: _notifTextPrimary,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 10),
-
-              // Main text lines
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      lineSpeeds,
-                      style: const TextStyle(
-                        color: _oneUiTextPrimary,
-                        fontSize: 13,
-                        height: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      lineTraffic,
-                      style: const TextStyle(
-                        color: _oneUiTextSecondary,
-                        fontSize: 12,
-                        height: 1.2,
-                      ),
-                    ),
-                  ],
+              const SizedBox(height: 6),
+              // Subtitle
+              Text(
+                lineTraffic,
+                style: const TextStyle(
+                  color: _notifTextSecondary,
+                  fontSize: 11.5,
                 ),
-              ),
-
-              // Subtle downward chevron
-              const Icon(
-                Icons.keyboard_arrow_down,
-                color: _oneUiChevron,
-                size: 16,
               ),
             ],
           ),
@@ -340,115 +361,122 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
     );
   }
 
-  /// Expanded Samsung One UI notification card (With app identity header)
+  /// Expanded modern notification card (ByteFlow title, DOWN/UP cards, and Mobile/Wi-Fi row)
   Widget _buildExpandedCard() {
-    final dlVal = '0';
-    final dlUnit = widget.useBits ? 'Kbps' : 'KB/s';
-    final lineSpeeds = widget.useBits
-        ? 'Down: 0 b/s   Up: 0 b/s'
-        : 'Down: 0 B/s   Up: 0 B/s';
-    final lineTraffic = 'Mobile: 910.4 MB   WiFi: 0 MB';
+    final dlSpeedStr = widget.useBits ? '0 b/s' : '0 B/s';
+    final ulSpeedStr = widget.useBits ? '0 b/s' : '0 B/s';
+    final lineTraffic = 'Mobile: 910.4 MB  •  Wi-Fi: 0 MB';
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         key: const ValueKey('expanded_card'),
-        borderRadius: BorderRadius.circular(32),
+        borderRadius: BorderRadius.circular(16),
         onTap: () {
           setState(() {
             _isExpanded = false;
           });
         },
         child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
+          padding: const EdgeInsets.all(12.0),
           decoration: BoxDecoration(
-            color: _oneUiNotifBg,
-            borderRadius: BorderRadius.circular(32),
+            color: _notifCardBg,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: _notifBorder),
           ),
-          child: Row(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left speed indicator: Numeric value on top, unit underneath
-              Padding(
-                padding: const EdgeInsets.only(top: 1.0),
-                child: SizedBox(
-                  width: 40,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        dlVal,
-                        style: const TextStyle(
-                          color: _oneUiTextPrimary,
-                          fontSize: 18,
-                          fontWeight: FontWeight.normal,
-                          height: 1.1,
-                        ),
-                      ),
-                      Text(
-                        dlUnit,
-                        style: const TextStyle(
-                          color: _oneUiUnitBlue,
-                          fontSize: 9,
-                          height: 1.1,
-                        ),
-                      ),
-                    ],
-                  ),
+              // Header: ByteFlow
+              const Text(
+                'ByteFlow',
+                style: TextStyle(
+                  color: _notifTextPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              const SizedBox(width: 10),
-
-              // Main content: App title + chevron in row 1, speeds in row 2, traffic stats in row 3
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Top Header: App Name + Chevron inline (matches ss2.jpg)
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Internet Speed Meter Lite',
-                          style: TextStyle(
-                            color: _oneUiTextPrimary,
-                            fontSize: 13,
-                            fontWeight: FontWeight.normal,
-                            height: 1.2,
+              const SizedBox(height: 9),
+              // Dual Metric Cards Row
+              Row(
+                children: [
+                  // DOWN Card
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _notifBadgeBg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _notifBorder),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'DOWN',
+                            style: TextStyle(
+                              color: _notifDownload,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        Icon(
-                          Icons.keyboard_arrow_up,
-                          color: _oneUiChevron,
-                          size: 16,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 5),
-                    // Line 2: Speeds
-                    Text(
-                      lineSpeeds,
-                      style: const TextStyle(
-                        color: _oneUiTextPrimary,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        height: 1.2,
+                          const SizedBox(height: 2),
+                          Text(
+                            dlSpeedStr,
+                            style: const TextStyle(
+                              color: _notifTextPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 2),
-                    // Line 3: Traffic Stats
-                    Text(
-                      lineTraffic,
-                      style: const TextStyle(
-                        color: _oneUiTextSecondary,
-                        fontSize: 12,
-                        height: 1.2,
+                  ),
+                  const SizedBox(width: 8),
+                  // UP Card
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: _notifBadgeBg,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _notifBorder),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'UP',
+                            style: TextStyle(
+                              color: _notifUpload,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            ulSpeedStr,
+                            style: const TextStyle(
+                              color: _notifTextPrimary,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
+                ],
+              ),
+              const SizedBox(height: 9),
+              // Subtitle
+              Text(
+                lineTraffic,
+                style: const TextStyle(
+                  color: _notifTextSecondary,
+                  fontSize: 11.5,
                 ),
               ),
             ],
@@ -458,13 +486,12 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
     );
   }
 
-  /// Samsung One UI Quick Settings Panel
+  /// System Quick Settings Panel Simulation
   Widget _buildQuickSettingsPanel() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: Column(
         children: [
-          // Date & Settings Row
           const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -480,8 +507,6 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
             ],
           ),
           const SizedBox(height: 12),
-
-          // Quick Toggle Circles
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -494,8 +519,6 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
             ],
           ),
           const SizedBox(height: 14),
-
-          // Brightness Slider Mockup
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             decoration: BoxDecoration(
@@ -532,7 +555,7 @@ class _NotificationPreviewCardState extends State<NotificationPreviewCard> {
       width: 44,
       height: 44,
       decoration: BoxDecoration(
-        color: isActive ? _oneUiBlue : _oneUiInactiveToggle,
+        color: isActive ? _shadeBlue : _shadeInactiveToggle,
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: Colors.white, size: 20),

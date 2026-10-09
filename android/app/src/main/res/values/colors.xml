@@ -20,6 +20,8 @@
     <color name="notif_upload">#EC4899</color>
     <color name="notif_surface">#1A1C20</color>
     <color name="notif_card_bg">#23262D</color>
+    <color name="notif_card_border">#2F333D</color>
+    <color name="notif_badge_bg">#1F2228</color>
     <color name="notif_border">#353942</color>
     <color name="notif_text_primary">#F1F3F9</color>
     <color name="notif_text_secondary">#9DA3AE</color>

@@ -76,30 +76,26 @@ object SpeedNotificationHelper {
         // 2. Formatted Speed and Traffic Strings
         val dlSpeedStr = formatSpeed(downloadBps, useBits)
         val ulSpeedStr = formatSpeed(uploadBps, useBits)
-        val (dlVal, dlUnit) = splitSpeed(downloadBps, useBits)
-        val speedsLine = "Down: $dlSpeedStr   Up: $ulSpeedStr"
-        val trafficLine = "Mobile: ${formatBytes(todayMobileBytes)}   WiFi: ${formatBytes(todayWifiBytes)}"
+        val trafficLine = "Mobile: ${formatBytes(todayMobileBytes)}  •  Wi-Fi: ${formatBytes(todayWifiBytes)}"
 
-        // 3. Collapsed RemoteViews (Samsung One UI compact card)
+        // 3. Collapsed RemoteViews (Modern compact card)
         val viewsCollapsed = RemoteViews(context.packageName, R.layout.notification_speed_collapsed).apply {
-            setTextViewText(R.id.notif_speed_val, dlVal)
-            setTextViewText(R.id.notif_speed_unit, dlUnit)
-            setTextViewText(R.id.notif_line_speeds, speedsLine)
-            setTextViewText(R.id.notif_line_traffic, trafficLine)
+            setTextViewText(R.id.notif_collapsed_download, dlSpeedStr)
+            setTextViewText(R.id.notif_collapsed_upload, ulSpeedStr)
+            setTextViewText(R.id.notif_collapsed_traffic, trafficLine)
         }
 
-        // 4. Expanded RemoteViews (Samsung One UI expanded card with header)
+        // 4. Expanded RemoteViews (Modern expanded card)
         val viewsExpanded = RemoteViews(context.packageName, R.layout.notification_speed_expanded).apply {
-            setTextViewText(R.id.notif_expanded_speed_val, dlVal)
-            setTextViewText(R.id.notif_expanded_speed_unit, dlUnit)
-            setTextViewText(R.id.notif_expanded_line_speeds, speedsLine)
-            setTextViewText(R.id.notif_expanded_line_traffic, trafficLine)
+            setTextViewText(R.id.notif_expanded_title, context.getString(R.string.speed_notification_title))
+            setTextViewText(R.id.notif_expanded_download, dlSpeedStr)
+            setTextViewText(R.id.notif_expanded_upload, ulSpeedStr)
+            setTextViewText(R.id.notif_expanded_traffic, trafficLine)
         }
 
         // 5. Construct NotificationCompat.Builder
         // Standalone notification: enforce null group and false group summary
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_stat_speed)
             .setContentIntent(pendingIntent)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -111,6 +107,18 @@ object SpeedNotificationHelper {
             .setGroupSummary(false)
             .setCustomContentView(viewsCollapsed)
             .setCustomBigContentView(viewsExpanded)
+
+        val isSamsung = Build.MANUFACTURER.equals("samsung", ignoreCase = true)
+        if (useDynamicIcon && !isSamsung) {
+            try {
+                val icon = SpeedIconGenerator.getDynamicSpeedIcon(totalBps, useBits)
+                builder.setSmallIcon(icon)
+            } catch (_: Exception) {
+                builder.setSmallIcon(R.drawable.ic_stat_speed)
+            }
+        } else {
+            builder.setSmallIcon(R.drawable.ic_stat_speed)
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             builder.setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
